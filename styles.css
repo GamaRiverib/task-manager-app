@@ -23,6 +23,14 @@ h1 {
   border: 1px solid #ddd;
   border-radius: 5px;
   background-color: #fff;
+  cursor: pointer;
+}
+
+.project.add-project {
+  background-color: #f0f0f0;
+  border: 2px dashed #ccc;
+  text-align: center;
+  cursor: pointer;
 }
 
 .project h2 {
@@ -30,7 +38,94 @@ h1 {
   color: #333;
 }
 
+.project.add-project h2 {
+  color: #007bff;
+}
+
 .project p {
   margin: 5px 0 0;
   color: #666;
+}
+
+/* Estilo general para el contenedor del formulario */
+#add-project-form-container {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Título del formulario */
+#add-project-form-container h2 {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+/* Estilo para el formulario */
+#add-project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Estilo para las etiquetas */
+#add-project-form label {
+  font-weight: bold;
+  color: #555;
+  text-align: left; /* Alinear las etiquetas a la izquierda */
+  display: block; /* Asegurar que cada etiqueta ocupe una línea completa */
+  width: 98%;
+  margin-top: 10px;
+}
+
+/* Estilo para los campos de entrada */
+#add-project-form input,
+#add-project-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Estilo para el área de texto */
+#add-project-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Contenedor para los botones */
+#add-project-form button {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Botón guardar */
+#add-project-form button[type="button"]:first-of-type {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Botón cancelar */
+#add-project-form button[type="button"]:last-of-type {
+  background-color: #ccc;
+  color: #333;
+}
+
+/* Espaciado entre botones */
+#add-project-form button + button {
+  margin-left: 10px;
+}
+
+/* Botones alineados al final */
+#add-project-form {
+  align-items: flex-end;
 }

@@ -120,23 +120,27 @@ const projects = [
 
 // Función para renderizar la lista de proyectos
 function renderProjects() {
-  const container = document.createElement("div");
-  container.id = "projects-container";
-  container.innerHTML = ""; // Limpiar contenido previo
+  const container = document.createElement('div');
+  container.id = 'projects-container';
+  container.innerHTML = ''; // Limpiar contenido previo
 
-  const title = document.createElement("h1");
-  title.textContent = "Lista de Proyectos";
+  const title = document.createElement('h1');
+  title.textContent = 'Lista de Proyectos';
   container.appendChild(title);
 
-  // Botón para agregar un nuevo proyecto
-  const addButton = document.createElement("button");
-  addButton.textContent = "Agregar Proyecto";
-  addButton.addEventListener("click", renderAddProjectForm);
-  container.appendChild(addButton);
+  // Botón "Agregar Proyecto" con estilo de proyecto
+  const addProjectElement = document.createElement('div');
+  addProjectElement.className = 'project add-project';
+  addProjectElement.innerHTML = `
+    <h2>+ Agregar Nuevo Proyecto</h2>
+  `;
+  addProjectElement.addEventListener('click', renderAddProjectForm);
+  container.appendChild(addProjectElement);
 
-  projects.forEach((project) => {
-    const projectElement = document.createElement("div");
-    projectElement.className = "project";
+  // Renderizar los proyectos existentes
+  projects.forEach(project => {
+    const projectElement = document.createElement('div');
+    projectElement.className = 'project';
 
     projectElement.innerHTML = `
       <h2>${project.name}</h2>
@@ -144,12 +148,12 @@ function renderProjects() {
     `;
 
     // Agregar evento de clic para mostrar categorías y tareas
-    projectElement.addEventListener("click", () => renderProjectDetails(project));
+    projectElement.addEventListener('click', () => renderProjectDetails(project));
 
     container.appendChild(projectElement);
   });
 
-  document.body.innerHTML = ""; // Limpiar el contenido de la página
+  document.body.innerHTML = ''; // Limpiar el contenido de la página
   document.body.appendChild(container);
 }
 
@@ -168,7 +172,7 @@ function renderAddProjectForm() {
 
   // Campo de texto para el nombre del proyecto
   const nameLabel = document.createElement("label");
-  nameLabel.textContent = "Nombre del Proyecto (obligatorio):";
+  nameLabel.textContent = "Nombre (obligatorio):";
   form.appendChild(nameLabel);
 
   const nameInput = document.createElement("input");
@@ -179,7 +183,7 @@ function renderAddProjectForm() {
 
   // Campo de texto para la descripción del proyecto
   const descriptionLabel = document.createElement("label");
-  descriptionLabel.textContent = "Descripción del Proyecto:";
+  descriptionLabel.textContent = "Descripción:";
   form.appendChild(descriptionLabel);
 
   const descriptionInput = document.createElement("textarea");
