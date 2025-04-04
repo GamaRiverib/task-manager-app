@@ -180,30 +180,70 @@ export function renderProjectDetails(projects, project) {
     }
   });
 
-  const groupedTasks = groupTasksByDate(project);
+  // Verificar si el proyecto tiene categorías
+  if (project.categories.length === 0) {
+    const noCategoriesMessage = document.createElement("p");
+    noCategoriesMessage.className = "no-categories-message";
+    noCategoriesMessage.textContent = "Este proyecto no tiene categorías. ";
 
-  renderTaskTable(container, "Tareas que vencen hoy", groupedTasks.today, projects, project);
-  renderTaskTable(
-    container,
-    "Tareas que vencen esta semana",
-    groupedTasks.thisWeek,
-    projects,
-    project
-  );
-  renderTaskTable(
-    container,
-    "Tareas que vencen este mes",
-    groupedTasks.thisMonth,
-    projects,
-    project
-  );
-  renderTaskTable(
-    container,
-    "Tareas con fechas posteriores",
-    groupedTasks.later,
-    projects,
-    project
-  );
+    const addCategoryLink = document.createElement("a");
+    addCategoryLink.href = "#";
+    addCategoryLink.textContent = "Haz clic aquí para agregar una categoría.";
+    addCategoryLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      updateURL({ page: "addCategory", projectId: project.id });
+      renderAddCategoryForm(projects, project);
+    });
+
+    noCategoriesMessage.appendChild(addCategoryLink);
+    container.appendChild(noCategoriesMessage);
+  } else {
+    // Verificar si el proyecto tiene tareas
+    const hasTasks = project.categories.some((category) => category.tasks.length > 0);
+
+    if (!hasTasks) {
+      const noTasksMessage = document.createElement("p");
+      noTasksMessage.className = "no-tasks-message";
+      noTasksMessage.textContent = "Este proyecto tiene categorías, pero no tiene tareas. ";
+
+      const addTaskLink = document.createElement("a");
+      addTaskLink.href = "#";
+      addTaskLink.textContent = "Haz clic aquí para agregar una tarea.";
+      addTaskLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        updateURL({ page: "addTask", projectId: project.id });
+        renderAddTaskForm(projects, project);
+      });
+
+      noTasksMessage.appendChild(addTaskLink);
+      container.appendChild(noTasksMessage);
+    } else {
+      const groupedTasks = groupTasksByDate(project);
+
+      renderTaskTable(container, "Tareas que vencen hoy", groupedTasks.today, projects, project);
+      renderTaskTable(
+        container,
+        "Tareas que vencen esta semana",
+        groupedTasks.thisWeek,
+        projects,
+        project
+      );
+      renderTaskTable(
+        container,
+        "Tareas que vencen este mes",
+        groupedTasks.thisMonth,
+        projects,
+        project
+      );
+      renderTaskTable(
+        container,
+        "Tareas con fechas posteriores",
+        groupedTasks.later,
+        projects,
+        project
+      );
+    }
+  }
 
   const backButton = document.createElement("button");
   backButton.textContent = "Regresar";

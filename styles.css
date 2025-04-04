@@ -483,3 +483,35 @@ h1 {
   text-align: left;
   margin-bottom: 20px;
 }
+
+/* Mensaje sin categorías */
+.no-categories-message {
+  font-size: 16px;
+  color: #555;
+  margin: 20px 0;
+}
+
+.no-categories-message a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.no-categories-message a:hover {
+  text-decoration: underline;
+}
+
+/* Mensaje sin tareas */
+.no-tasks-message {
+  font-size: 16px;
+  color: #555;
+  margin: 20px 0;
+}
+
+.no-tasks-message a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.no-tasks-message a:hover {
+  text-decoration: underline;
+}
