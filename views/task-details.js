@@ -220,45 +220,59 @@ export function renderTaskDetails(projects, project, task) {
     trackingSection.appendChild(input);
   });
 
+  // Crear formulario para agregar nuevas subtareas
+  const addSubtaskForm = document.createElement("div");
+  addSubtaskForm.className = "form add-subtask-form";
+
+  subtasksSection.appendChild(addSubtaskForm);
+
   // Crear título para la lista de subtareas
   const subtasksTitle = document.createElement("h3");
   subtasksTitle.textContent = "Lista de Subtareas";
   subtasksTitle.className = "subtasks-title";
 
+  // Agregar el título al contenedor de subtareas
+  subtasksSection.appendChild(subtasksTitle);
+
   // Lista de subtareas
   const subtasksList = document.createElement("ul");
   subtasksList.className = "subtasks-list";
 
-  task.subtasks.forEach((subtask, index) => {
-    const listItem = document.createElement("li");
-    listItem.className = "subtask-item";
+  // Verificar si hay subtareas
+  if (task.subtasks.length === 0) {
+    const noSubtasksMessage = document.createElement("p");
+    noSubtasksMessage.className = "no-subtasks-message";
+    noSubtasksMessage.textContent = "No hay subtareas. Agrega una nueva subtarea para comenzar.";
+    subtasksSection.appendChild(noSubtasksMessage);
+  } else {
+    task.subtasks.forEach((subtask, index) => {
+      const listItem = document.createElement("li");
+      listItem.className = "subtask-item";
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = subtask.completed;
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = subtask.completed;
 
-    // Actualizar el estado de la subtarea al cambiar la casilla
-    checkbox.addEventListener("change", (event) => {
-      // @ts-ignore
-      const isChecked = event.target?.checked ?? false;
-      task.subtasks[index].completed = isChecked;
+      // Actualizar el estado de la subtarea al cambiar la casilla
+      checkbox.addEventListener("change", (event) => {
+        // @ts-ignore
+        const isChecked = event.target?.checked ?? false;
+        task.subtasks[index].completed = isChecked;
+      });
+
+      const title = document.createElement("span");
+      title.textContent = subtask.title;
+      title.title = subtask.description || "Sin descripción"; // Mostrar la descripción como tooltip
+
+      listItem.appendChild(checkbox);
+      listItem.appendChild(title);
+      subtasksList.appendChild(listItem);
     });
-
-    const title = document.createElement("span");
-    title.textContent = subtask.title;
-    title.title = subtask.description || "Sin descripción"; // Mostrar la descripción como tooltip
-
-    listItem.appendChild(checkbox);
-    listItem.appendChild(title);
-    subtasksList.appendChild(listItem);
-  });
+  }
 
   // Agregar la lista al contenedor de subtareas
   subtasksSection.appendChild(subtasksList);
 
-  // Crear formulario para agregar nuevas subtareas
-  const addSubtaskForm = document.createElement("div");
-  addSubtaskForm.className = "form add-subtask-form";
 
   const subtaskInput = document.createElement("input");
   subtaskInput.type = "text";
@@ -318,7 +332,6 @@ export function renderTaskDetails(projects, project, task) {
   // Agregar el formulario y la lista al contenedor de subtareas
   addSubtaskForm.appendChild(subtaskInput);
   addSubtaskForm.appendChild(addSubtaskButton);
-  subtasksSection.appendChild(addSubtaskForm);
   subtasksSection.appendChild(subtasksTitle);
   subtasksSection.appendChild(subtasksList);
 
