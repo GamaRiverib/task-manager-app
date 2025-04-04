@@ -220,6 +220,11 @@ export function renderTaskDetails(projects, project, task) {
     trackingSection.appendChild(input);
   });
 
+  // Crear título para la lista de subtareas
+  const subtasksTitle = document.createElement("h3");
+  subtasksTitle.textContent = "Lista de Subtareas";
+  subtasksTitle.className = "subtasks-title";
+
   // Lista de subtareas
   const subtasksList = document.createElement("ul");
   subtasksList.className = "subtasks-list";
@@ -241,12 +246,80 @@ export function renderTaskDetails(projects, project, task) {
 
     const title = document.createElement("span");
     title.textContent = subtask.title;
+    title.title = subtask.description || "Sin descripción"; // Mostrar la descripción como tooltip
 
     listItem.appendChild(checkbox);
     listItem.appendChild(title);
     subtasksList.appendChild(listItem);
   });
 
+  // Agregar la lista al contenedor de subtareas
+  subtasksSection.appendChild(subtasksList);
+
+  // Crear formulario para agregar nuevas subtareas
+  const addSubtaskForm = document.createElement("div");
+  addSubtaskForm.className = "form add-subtask-form";
+
+  const subtaskInput = document.createElement("input");
+  subtaskInput.type = "text";
+  subtaskInput.placeholder = "Nueva subtarea...";
+  subtaskInput.className = "subtask-input";
+
+  const addSubtaskButton = document.createElement("button");
+  addSubtaskButton.type = "button";
+  addSubtaskButton.textContent = "Agregar";
+  addSubtaskButton.className = "form-button save-button";
+
+  // Evento para agregar una nueva subtarea
+  addSubtaskButton.addEventListener("click", () => {
+    const newSubtaskTitle = subtaskInput.value.trim();
+    if (newSubtaskTitle === "") {
+      alert("El título de la subtarea no puede estar vacío.");
+      return;
+    }
+
+    // Crear nueva subtarea
+    const newSubtask = {
+      title: newSubtaskTitle,
+      description: "", // Descripción vacía por defecto
+      completed: false,
+    };
+
+    // Agregar la nueva subtarea al objeto `task`
+    task.subtasks.push(newSubtask);
+
+    // Actualizar la lista de subtareas en la interfaz
+    const listItem = document.createElement("li");
+    listItem.className = "subtask-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = newSubtask.completed;
+
+    // Actualizar el estado de la subtarea al cambiar la casilla
+    checkbox.addEventListener("change", (event) => {
+      // @ts-ignore
+      const isChecked = event.target.checked;
+      newSubtask.completed = isChecked;
+    });
+
+    const title = document.createElement("span");
+    title.textContent = newSubtask.title;
+    title.title = newSubtask.description || "Sin descripción"; // Mostrar la descripción como tooltip
+
+    listItem.appendChild(checkbox);
+    listItem.appendChild(title);
+    subtasksList.appendChild(listItem);
+
+    // Limpiar el campo de entrada
+    subtaskInput.value = "";
+  });
+
+  // Agregar el formulario y la lista al contenedor de subtareas
+  addSubtaskForm.appendChild(subtaskInput);
+  addSubtaskForm.appendChild(addSubtaskButton);
+  subtasksSection.appendChild(addSubtaskForm);
+  subtasksSection.appendChild(subtasksTitle);
   subtasksSection.appendChild(subtasksList);
 
   form.appendChild(generalSection);
@@ -285,7 +358,9 @@ export function renderTaskDetails(projects, project, task) {
    */
   function switchTab(tabId) {
     document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
+    document
+      .querySelectorAll(".tab-content")
+      .forEach((content) => content.classList.remove("active"));
 
     const tabElement = document.querySelector(`.tab.${tabId}`);
     if (tabElement) {

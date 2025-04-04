@@ -470,3 +470,16 @@ h1 {
   appearance: auto; /* Usa el estilo predeterminado del navegador */
   -webkit-appearance: checkbox; /* Asegura compatibilidad con navegadores basados en WebKit */
 }
+
+.add-subtask-form {
+  margin-bottom: 40px;
+}
+
+.subtasks-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+  text-align: left;
+  margin-bottom: 20px;
+}
