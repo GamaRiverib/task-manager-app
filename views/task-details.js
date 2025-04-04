@@ -1,56 +1,208 @@
 // @ts-check
 
 import { renderProjectDetails } from "./project-details.js";
+import { TaskStatus, TaskPriority } from "../data.js";
 
 /**
- * Función para renderizar los detalles de una tarea
+ * Función para renderizar y editar los detalles de una tarea
  * @param {import("../data.js").Project[]} projects
  * @param {import("../data.js").Project} project
  * @param {import("../data.js").Task} task
  */
 export function renderTaskDetails(projects, project, task) {
   const container = document.createElement("div");
+  container.className = "form-container";
   container.id = "task-details-container";
   container.innerHTML = ""; // Limpiar contenido previo
 
-  const title = document.createElement("h2");
-  title.textContent = `Tarea: ${task.title}`;
-  container.appendChild(title);
+  // Crear el breadcrumb
+  const breadcrumb = document.createElement("nav");
+  breadcrumb.className = "breadcrumb";
 
-  const details = document.createElement("div");
-  details.innerHTML = `
-    <p><strong>Descripción:</strong> ${task.description}</p>
-    <p><strong>Responsable:</strong> ${task.assignee}</p>
-    <p><strong>Fecha de vencimiento:</strong> ${task.dueDate}</p>
-    <p><strong>Estado:</strong> ${task.status}</p>
-    <p><strong>Prioridad:</strong> ${task.priority}</p>
-    <p><strong>Progreso:</strong> ${task.progress}%</p>
-    <p><strong>Notas:</strong> ${task.notes}</p>
-    <p><strong>Etiquetas:</strong> ${task.tags.join(", ")}</p>
-    <p><strong>Comentarios:</strong> ${task.comments.join("; ")}</p>
-    <h3>Subtareas:</h3>
-    <ul>
-      ${task.subtasks
-        .map(
-          (subtask) => `
-        <li>
-          <strong>${subtask.title}</strong>: ${subtask.description} - ${
-            subtask.completed ? "Terminado" : "Pendiente"
-          }
-        </li>
-      `
-        )
-        .join("")}
-    </ul>
-  `;
-  container.appendChild(details);
+  const projectLink = document.createElement("span");
+  projectLink.textContent = project.name;
+  projectLink.className = "breadcrumb-item";
+  projectLink.addEventListener("click", () => renderProjectDetails(projects, project));
+  breadcrumb.appendChild(projectLink);
 
-  // Botón para cerrar y regresar a la lista de categorías y tareas
-  const closeButton = document.createElement("button");
-  closeButton.textContent = "Cerrar";
-  closeButton.addEventListener("click", () => renderProjectDetails(projects, project));
-  container.appendChild(closeButton);
+  const separator1 = document.createElement("span");
+  separator1.textContent = " > ";
+  breadcrumb.appendChild(separator1);
+
+  const categoryName = task.category || "Sin Categoría";
+  const categoryLink = document.createElement("span");
+  categoryLink.textContent = categoryName;
+  categoryLink.className = "breadcrumb-item";
+  breadcrumb.appendChild(categoryLink);
+
+  const separator2 = document.createElement("span");
+  separator2.textContent = " > ";
+  breadcrumb.appendChild(separator2);
+
+  const taskTitle = document.createElement("span");
+  taskTitle.textContent = task.title;
+  taskTitle.className = "breadcrumb-item active";
+  breadcrumb.appendChild(taskTitle);
+
+  container.appendChild(breadcrumb);
+
+  // Crear las pestañas (TABs)
+  const tabsContainer = document.createElement("div");
+  tabsContainer.className = "tabs-container";
+
+  const tabs = document.createElement("ul");
+  tabs.className = "tabs";
+
+  const generalTab = document.createElement("li");
+  generalTab.textContent = "Información General";
+  generalTab.className = "tab active";
+  generalTab.addEventListener("click", () => switchTab("general"));
+  tabs.appendChild(generalTab);
+
+  const trackingTab = document.createElement("li");
+  trackingTab.textContent = "Seguimiento";
+  trackingTab.className = "tab";
+  trackingTab.addEventListener("click", () => switchTab("tracking"));
+  tabs.appendChild(trackingTab);
+
+  tabsContainer.appendChild(tabs);
+  container.appendChild(tabsContainer);
+
+  const form = document.createElement("form");
+  form.className = "form";
+
+  container.appendChild(form);
+
+  // Crear los contenedores de las secciones
+  const generalSection = document.createElement("div");
+  generalSection.id = "general";
+  generalSection.className = "tab-content active";
+
+  const trackingSection = document.createElement("div");
+  trackingSection.id = "tracking";
+  trackingSection.className = "tab-content";
+
+  // Campos para Información General
+  const generalFields = [
+    { label: "ID:", id: "task-id", type: "text", value: task.id, readonly: true },
+    { label: "Categoría:", id: "task-category", type: "text", value: task.category || "", readonly: true },
+    { label: "Título (obligatorio):", id: "task-title", type: "text", value: task.title, required: true },
+    { label: "Descripción:", id: "task-description", type: "textarea", value: task.description || "" },
+    { label: "Responsable:", id: "task-assignee", type: "text", value: task.assignee || "" },
+    { label: "Fecha de Creación:", id: "task-createdAt", type: "text", value: task.createdAt, readonly: true },
+    { label: "Fecha de Vencimiento:", id: "task-dueDate", type: "date", value: task.dueDate || "" },
+  ];
+
+  generalFields.forEach((field) => {
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    generalSection.appendChild(label);
+
+    let input;
+    if (field.type === "textarea") {
+      input = document.createElement("textarea");
+      input.value = String(field.value);
+    } else {
+      input = document.createElement("input");
+      input.type = field.type;
+      input.value = String(field.value);
+    }
+
+    input.id = field.id;
+    if (field.readonly) input.readOnly = true;
+    if (field.required) input.required = true;
+    generalSection.appendChild(input);
+  });
+
+  // Campos para Seguimiento
+  const trackingFields = [
+    {
+      label: "Estado:",
+      id: "task-status",
+      type: "select",
+      value: task.status,
+      options: Object.values(TaskStatus),
+    },
+    {
+      label: "Prioridad:",
+      id: "task-priority",
+      type: "select",
+      value: task.priority,
+      options: Object.values(TaskPriority),
+    },
+    { label: "Progreso (%):", id: "task-progress", type: "number", value: task.progress || 0 },
+    { label: "Etiquetas (separadas por comas):", id: "task-tags", type: "text", value: task.tags.join(", ") || "" },
+    { label: "Comentarios (separados por punto y coma):", id: "task-comments", type: "text", value: task.comments.join("; ") || "" },
+    { label: "Notas:", id: "task-notes", type: "textarea", value: task.notes || "" },
+  ];
+
+  trackingFields.forEach((field) => {
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    trackingSection.appendChild(label);
+
+    let input;
+    if (field.type === "textarea") {
+      input = document.createElement("textarea");
+      input.value = String(field.value);
+    } else if (field.type === "select") {
+      input = document.createElement("select");
+      (field.options || []).forEach((optionValue) => {
+        const option = document.createElement("option");
+        option.value = optionValue;
+        option.textContent = optionValue;
+        if (optionValue === field.value) {
+          option.selected = true;
+        }
+        input.appendChild(option);
+      });
+    } else {
+      input = document.createElement("input");
+      input.type = field.type;
+      input.value = String(field.value);
+    }
+
+    input.id = field.id;
+    if (field.required) input.required = true;
+    trackingSection.appendChild(input);
+  });
+
+  form.appendChild(generalSection);
+  form.appendChild(trackingSection);
+
+  // Botón para guardar los cambios
+  const saveButton = document.createElement("button");
+  saveButton.type = "button";
+  saveButton.textContent = "Actualizar";
+  saveButton.className = "form-button save-button";
+  saveButton.addEventListener("click", () => {
+    // Implementar lógica para guardar cambios
+  });
+  form.appendChild(saveButton);
+
+  // Botón para cancelar
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.textContent = "Cancelar";
+  cancelButton.className = "form-button cancel-button";
+  cancelButton.addEventListener("click", () => renderProjectDetails(projects, project));
+  form.appendChild(cancelButton);
 
   document.body.innerHTML = ""; // Limpiar el contenido de la página
   document.body.appendChild(container);
+
+  // Función para alternar entre pestañas
+  function switchTab(tabId) {
+    document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
+
+    const tabElement = document.querySelector(`.tab.${tabId}`);
+    if (tabElement) {
+      tabElement.classList.add("active");
+    }
+    const tabContent = document.querySelector(`#${tabId}`);
+    if (tabContent) {
+      tabContent.classList.add("active");
+    }
+  }
 }

@@ -125,7 +125,7 @@ export function renderProjectDetails(projects, project) {
   container.innerHTML = "";
 
   const title = document.createElement("h2");
-  title.textContent = `Proyecto: ${project.name}`;
+  title.textContent = project.name;
   container.appendChild(title);
 
   const actionButtonsContainer = document.createElement("div");

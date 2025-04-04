@@ -393,3 +393,58 @@ h1 {
   color: #000; /* Cambia el color del texto al pasar el cursor */
   font-weight: bold; /* Opcional: resaltar el texto */
 }
+
+/* Breadcrumb */
+.breadcrumb {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.breadcrumb-item {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.breadcrumb-item:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+  color: #333;
+  cursor: default;
+  text-decoration: none;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  border-bottom: 2px solid #ccc;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  background-color: #f9f9f9;
+  margin-right: 5px;
+}
+
+.tab.active {
+  background-color: white;
+  font-weight: bold;
+  border-bottom: 2px solid white;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
