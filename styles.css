@@ -97,6 +97,7 @@ h1 {
   box-sizing: border-box;
   background-color: white; /* Asegura un fondo consistente */
   appearance: none; /* Elimina el estilo predeterminado del navegador en los select */
+  margin: 5px 0 20px; /* Espaciado entre el campo y el botón */
 }
 
 /* Estilo para el área de texto */
@@ -142,6 +143,17 @@ h1 {
 
 .form-button.save-button:hover {
   background-color: #218838;
+}
+
+/* Botón agregar */
+.form-button.add-button {
+  background-color: #3A6FE8;
+  color: white;
+  margin: 5px 0;
+}
+
+.form-button.save-button:hover {
+  background-color: #0056b3;
 }
 
 /* Botón cancelar */
@@ -464,7 +476,7 @@ h1 {
 }
 
 .subtask-item input[type="checkbox"] {
-  margin-right: 10px;
+  margin: 5px 10px 5px 5px;
   width: auto; /* Asegura que la casilla tenga un tamaño adecuado */
   height: auto; /* Asegura que la altura sea consistente */
   cursor: pointer; /* Cambia el cursor a pointer para indicar interactividad */
@@ -474,6 +486,10 @@ h1 {
 
 .add-subtask-form {
   margin-bottom: 40px;
+}
+
+.add-subtask-form input.subtask-input {
+  margin-bottom: 0;
 }
 
 .subtasks-title {

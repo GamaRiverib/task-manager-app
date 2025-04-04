@@ -174,7 +174,7 @@ export function renderTaskDetails(projects, project, task) {
       options: Object.values(TaskPriority),
     },
     {
-      label: "Progreso (%):",
+      label: "Progreso",
       id: "task-progress",
       type: "range", // Cambiar el tipo a "range" para usar un slider
       value: task.progress || 0,
@@ -225,19 +225,14 @@ export function renderTaskDetails(projects, project, task) {
       input.max = String(field.max || "100");
       input.step = String(field.step || "1");
 
-      // Mostrar el valor del progreso junto al slider
-      const progressValue = document.createElement("span");
-      progressValue.textContent = `${field.value}%`;
-      progressValue.className = "progress-value";
-
       input.addEventListener("input", (event) => {
         // @ts-ignore
         const sliderValue = event.target.value;
-        progressValue.textContent = `${sliderValue}%`;
+        label.textContent = `${field.label} (${sliderValue}%):`;
         task.progress = parseInt(sliderValue, 10); // Actualizar el progreso en el objeto `task`
       });
 
-      trackingSection.appendChild(progressValue);
+      // trackingSection.appendChild(progressValue);
     } else {
       input = document.createElement("input");
       input.type = field.type;
@@ -310,7 +305,7 @@ export function renderTaskDetails(projects, project, task) {
   const addSubtaskButton = document.createElement("button");
   addSubtaskButton.type = "button";
   addSubtaskButton.textContent = "Agregar";
-  addSubtaskButton.className = "form-button save-button";
+  addSubtaskButton.className = "form-button add-button";
 
   // Evento para agregar una nueva subtarea
   addSubtaskButton.addEventListener("click", () => {
