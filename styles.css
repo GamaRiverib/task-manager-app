@@ -523,3 +523,17 @@ h1 {
   margin: 10px 0;
   text-align: center;
 }
+
+/* Input range */
+input[type="range"] {
+  width: 100%;
+  margin: 10px 0;
+  appearance: auto; /* Usa el estilo predeterminado del navegador */
+  -webkit-appearance: checkbox; /* Asegura compatibilidad con navegadores basados en WebKit */
+}
+
+.progress-value {
+  font-size: 14px;
+  color: #555;
+  margin-left: 10px;
+}

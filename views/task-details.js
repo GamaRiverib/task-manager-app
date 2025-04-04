@@ -173,7 +173,15 @@ export function renderTaskDetails(projects, project, task) {
       value: task.priority,
       options: Object.values(TaskPriority),
     },
-    { label: "Progreso (%):", id: "task-progress", type: "number", value: task.progress || 0 },
+    {
+      label: "Progreso (%):",
+      id: "task-progress",
+      type: "range", // Cambiar el tipo a "range" para usar un slider
+      value: task.progress || 0,
+      min: 0, // Valor mínimo del slider
+      max: 100, // Valor máximo del slider
+      step: 1, // Incremento del slider
+    },
     {
       label: "Etiquetas (separadas por comas):",
       id: "task-tags",
@@ -209,6 +217,27 @@ export function renderTaskDetails(projects, project, task) {
         }
         input.appendChild(option);
       });
+    } else if (field.type === "range") {
+      input = document.createElement("input");
+      input.type = "range";
+      input.value = String(field.value);
+      input.min = String(field.min || "0");
+      input.max = String(field.max || "100");
+      input.step = String(field.step || "1");
+
+      // Mostrar el valor del progreso junto al slider
+      const progressValue = document.createElement("span");
+      progressValue.textContent = `${field.value}%`;
+      progressValue.className = "progress-value";
+
+      input.addEventListener("input", (event) => {
+        // @ts-ignore
+        const sliderValue = event.target.value;
+        progressValue.textContent = `${sliderValue}%`;
+        task.progress = parseInt(sliderValue, 10); // Actualizar el progreso en el objeto `task`
+      });
+
+      trackingSection.appendChild(progressValue);
     } else {
       input = document.createElement("input");
       input.type = field.type;
@@ -272,7 +301,6 @@ export function renderTaskDetails(projects, project, task) {
 
   // Agregar la lista al contenedor de subtareas
   subtasksSection.appendChild(subtasksList);
-
 
   const subtaskInput = document.createElement("input");
   subtaskInput.type = "text";
