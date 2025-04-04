@@ -2,6 +2,7 @@
 
 import { renderProjectDetails } from "./project-details.js";
 import { TaskStatus, TaskPriority } from "../data.js";
+import { updateURL } from "../navigation.js";
 
 /**
  * Función para renderizar y editar los detalles de una tarea
@@ -55,15 +56,30 @@ export function renderTaskDetails(projects, project, task) {
 
   const generalTab = document.createElement("li");
   generalTab.textContent = "Información General";
-  generalTab.className = "tab active";
-  generalTab.addEventListener("click", () => switchTab("general"));
+  generalTab.className = "tab general";
+  generalTab.addEventListener("click", () => {
+    updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id, tab: "general" });
+    switchTab("general");
+  });
   tabs.appendChild(generalTab);
 
   const trackingTab = document.createElement("li");
   trackingTab.textContent = "Seguimiento";
-  trackingTab.className = "tab";
-  trackingTab.addEventListener("click", () => switchTab("tracking"));
+  trackingTab.className = "tab tracking";
+  trackingTab.addEventListener("click", () => {
+    updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id, tab: "tracking" });
+    switchTab("tracking");
+  });
   tabs.appendChild(trackingTab);
+
+  const subtasksTab = document.createElement("li");
+  subtasksTab.textContent = "Subtareas";
+  subtasksTab.className = "tab subtasks";
+  subtasksTab.addEventListener("click", () => {
+    updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id, tab: "subtasks" });
+    switchTab("subtasks");
+  });
+  tabs.appendChild(subtasksTab);
 
   tabsContainer.appendChild(tabs);
   container.appendChild(tabsContainer);
@@ -76,20 +92,47 @@ export function renderTaskDetails(projects, project, task) {
   // Crear los contenedores de las secciones
   const generalSection = document.createElement("div");
   generalSection.id = "general";
-  generalSection.className = "tab-content active";
+  generalSection.className = "tab-content";
 
   const trackingSection = document.createElement("div");
   trackingSection.id = "tracking";
   trackingSection.className = "tab-content";
 
+  const subtasksSection = document.createElement("div");
+  subtasksSection.id = "subtasks";
+  subtasksSection.className = "tab-content";
+
   // Campos para Información General
   const generalFields = [
     { label: "ID:", id: "task-id", type: "text", value: task.id, readonly: true },
-    { label: "Categoría:", id: "task-category", type: "text", value: task.category || "", readonly: true },
-    { label: "Título (obligatorio):", id: "task-title", type: "text", value: task.title, required: true },
-    { label: "Descripción:", id: "task-description", type: "textarea", value: task.description || "" },
+    {
+      label: "Categoría:",
+      id: "task-category",
+      type: "text",
+      value: task.category || "",
+      readonly: true,
+    },
+    {
+      label: "Título (obligatorio):",
+      id: "task-title",
+      type: "text",
+      value: task.title,
+      required: true,
+    },
+    {
+      label: "Descripción:",
+      id: "task-description",
+      type: "textarea",
+      value: task.description || "",
+    },
     { label: "Responsable:", id: "task-assignee", type: "text", value: task.assignee || "" },
-    { label: "Fecha de Creación:", id: "task-createdAt", type: "text", value: task.createdAt, readonly: true },
+    {
+      label: "Fecha de Creación:",
+      id: "task-createdAt",
+      type: "text",
+      value: task.createdAt,
+      readonly: true,
+    },
     { label: "Fecha de Vencimiento:", id: "task-dueDate", type: "date", value: task.dueDate || "" },
   ];
 
@@ -131,8 +174,18 @@ export function renderTaskDetails(projects, project, task) {
       options: Object.values(TaskPriority),
     },
     { label: "Progreso (%):", id: "task-progress", type: "number", value: task.progress || 0 },
-    { label: "Etiquetas (separadas por comas):", id: "task-tags", type: "text", value: task.tags.join(", ") || "" },
-    { label: "Comentarios (separados por punto y coma):", id: "task-comments", type: "text", value: task.comments.join("; ") || "" },
+    {
+      label: "Etiquetas (separadas por comas):",
+      id: "task-tags",
+      type: "text",
+      value: task.tags.join(", ") || "",
+    },
+    {
+      label: "Comentarios (separados por punto y coma):",
+      id: "task-comments",
+      type: "text",
+      value: task.comments.join("; ") || "",
+    },
     { label: "Notas:", id: "task-notes", type: "textarea", value: task.notes || "" },
   ];
 
@@ -167,8 +220,38 @@ export function renderTaskDetails(projects, project, task) {
     trackingSection.appendChild(input);
   });
 
+  // Lista de subtareas
+  const subtasksList = document.createElement("ul");
+  subtasksList.className = "subtasks-list";
+
+  task.subtasks.forEach((subtask, index) => {
+    const listItem = document.createElement("li");
+    listItem.className = "subtask-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = subtask.completed;
+
+    // Actualizar el estado de la subtarea al cambiar la casilla
+    checkbox.addEventListener("change", (event) => {
+      // @ts-ignore
+      const isChecked = event.target?.checked ?? false;
+      task.subtasks[index].completed = isChecked;
+    });
+
+    const title = document.createElement("span");
+    title.textContent = subtask.title;
+
+    listItem.appendChild(checkbox);
+    listItem.appendChild(title);
+    subtasksList.appendChild(listItem);
+  });
+
+  subtasksSection.appendChild(subtasksList);
+
   form.appendChild(generalSection);
   form.appendChild(trackingSection);
+  form.appendChild(subtasksSection);
 
   // Botón para guardar los cambios
   const saveButton = document.createElement("button");
@@ -191,7 +274,15 @@ export function renderTaskDetails(projects, project, task) {
   document.body.innerHTML = ""; // Limpiar el contenido de la página
   document.body.appendChild(container);
 
-  // Función para alternar entre pestañas
+  // Leer el parámetro `tab` de la URL y activar la pestaña correspondiente
+  const params = new URLSearchParams(window.location.search);
+  const activeTab = params.get("tab") || "general"; // Por defecto, activar la pestaña "general"
+  switchTab(activeTab);
+
+  /**
+   * Función para alternar entre pestañas
+   * @param {string} tabId
+   */
   function switchTab(tabId) {
     document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
     document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));

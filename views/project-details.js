@@ -1,5 +1,6 @@
 // @ts-check
 
+import { updateURL } from "../navigation.js";
 import { renderAddCategoryForm } from "./add-category-form.js";
 import { renderAddTaskForm } from "./add-task-form.js";
 import { renderProjects } from "./projects-list.js";
@@ -106,7 +107,10 @@ function renderTaskTable(container, title, tasks, projects, project) {
       <td>${task.status}</td>
       <td>${task.priority}</td>
     `;
-    row.addEventListener("click", () => renderTaskDetails(projects, project, task));
+    row.addEventListener("click", () => {
+      updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id });
+      renderTaskDetails(projects, project, task);
+    });
     tbody.appendChild(row);
   });
   table.appendChild(tbody);
@@ -145,13 +149,19 @@ export function renderProjectDetails(projects, project) {
   const addCategoryOption = document.createElement("div");
   addCategoryOption.textContent = "Agregar Categoría";
   addCategoryOption.className = "dropdown-item";
-  addCategoryOption.addEventListener("click", () => renderAddCategoryForm(projects, project));
+  addCategoryOption.addEventListener("click", () => {
+    updateURL({ page: "addCategory", projectId: project.id });
+    renderAddCategoryForm(projects, project);
+  });
   dropdownMenu.appendChild(addCategoryOption);
 
   const addTaskOption = document.createElement("div");
   addTaskOption.textContent = "Agregar Tarea";
   addTaskOption.className = "dropdown-item";
-  addTaskOption.addEventListener("click", () => renderAddTaskForm(projects, project));
+  addTaskOption.addEventListener("click", () => {
+    updateURL({ page: "addTask", projectId: project.id });
+    renderAddTaskForm(projects, project);
+  });
   dropdownMenu.appendChild(addTaskOption);
 
   dropdownContainer.appendChild(dropdownMenu);
