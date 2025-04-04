@@ -57,6 +57,15 @@ export const TaskStatus = {
   FUTURE_TASK: "Tarea Futura",
 };
 
+/**
+ * Enumerador para las prioridades de las tareas
+ */
+export const TaskPriority = {
+  HIGH: "Alta",
+  MEDIUM: "Media",
+  LOW: "Baja",
+};
+
 export const projects = [
   {
     id: 1,
@@ -73,7 +82,7 @@ export const projects = [
             assignee: "Juan Pérez",
             dueDate: "2025-04-10",
             status: TaskStatus.PENDING, // Usar el enumerador
-            priority: "Alta",
+            priority: TaskPriority.HIGH, // Usar el nuevo enumerador
             category: "Categoría 1",
             tags: ["importante", "urgente"],
             createdAt: "2025-04-01",
@@ -94,7 +103,7 @@ export const projects = [
             assignee: "Ana López",
             dueDate: "2025-04-12",
             status: TaskStatus.IN_PROGRESS, // Usar el enumerador
-            priority: "Media",
+            priority: TaskPriority.MEDIUM, // Usar el nuevo enumerador
             category: "Categoría 1",
             tags: ["revisión"],
             createdAt: "2025-04-02",
@@ -119,7 +128,7 @@ export const projects = [
             assignee: "Carlos Gómez",
             dueDate: "2025-04-15",
             status: TaskStatus.COMPLETED, // Usar el enumerador
-            priority: "Baja",
+            priority: TaskPriority.LOW, // Usar el nuevo enumerador
             category: "Categoría 2",
             tags: ["finalizado"],
             createdAt: "2025-03-28",
@@ -149,7 +158,7 @@ export const projects = [
             assignee: "Luis Martínez",
             dueDate: "2025-04-20",
             status: TaskStatus.TO_SCHEDULE, // Usar el enumerador
-            priority: "Alta",
+            priority: TaskPriority.HIGH, // Usar el nuevo enumerador
             category: "Categoría 1",
             tags: ["urgente"],
             createdAt: "2025-04-03",

@@ -1,7 +1,7 @@
 // @ts-check
 
 import { updateURL } from "./navigation.js";
-import { TaskStatus } from "./data.js";
+import { TaskStatus, TaskPriority } from "./data.js";
 
 /**
  * @typedef {Function} RenderFunction
@@ -66,24 +66,22 @@ function renderProjects(projects) {
  */
 function renderAddProjectForm(projects) {
   const container = document.createElement("div");
-  container.id = "add-project-form-container";
-  container.innerHTML = ""; // Limpiar contenido previo
+  container.className = "form-container";
 
   const title = document.createElement("h2");
-  title.textContent = "Agregar Nuevo Proyecto";
+  title.textContent = "Registrar Nuevo Proyecto";
   container.appendChild(title);
 
   const form = document.createElement("form");
-  form.id = "add-project-form";
+  form.className = "form";
 
   // Campo de texto para el nombre del proyecto
   const nameLabel = document.createElement("label");
-  nameLabel.textContent = "Nombre (obligatorio):";
+  nameLabel.textContent = "Nombre del Proyecto (obligatorio):";
   form.appendChild(nameLabel);
 
   const nameInput = document.createElement("input");
   nameInput.type = "text";
-  nameInput.id = "project-name";
   nameInput.required = true;
   form.appendChild(nameInput);
 
@@ -93,13 +91,13 @@ function renderAddProjectForm(projects) {
   form.appendChild(descriptionLabel);
 
   const descriptionInput = document.createElement("textarea");
-  descriptionInput.id = "project-description";
   form.appendChild(descriptionInput);
 
-  // Botón para guardar el proyecto
+  // Botón guardar
   const saveButton = document.createElement("button");
   saveButton.type = "button";
   saveButton.textContent = "Guardar";
+  saveButton.className = "form-button save-button";
   saveButton.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const description = descriptionInput.value.trim();
@@ -122,10 +120,11 @@ function renderAddProjectForm(projects) {
   });
   form.appendChild(saveButton);
 
-  // Botón para cancelar y regresar a la lista de proyectos
+  // Botón cancelar
   const cancelButton = document.createElement("button");
   cancelButton.type = "button";
   cancelButton.textContent = "Cancelar";
+  cancelButton.className = "form-button cancel-button";
   cancelButton.addEventListener("click", () => renderProjects(projects));
   form.appendChild(cancelButton);
 
@@ -202,9 +201,27 @@ function renderProjectDetails(projects, project) {
 
   // Renderizar las tablas para cada grupo de tareas
   renderTaskTable(container, "Tareas que vencen hoy", groupedTasks.today, projects, project);
-  renderTaskTable(container, "Tareas que vencen esta semana", groupedTasks.thisWeek, projects, project);
-  renderTaskTable(container, "Tareas que vencen este mes", groupedTasks.thisMonth, projects, project);
-  renderTaskTable(container, "Tareas con fechas posteriores", groupedTasks.later, projects, project);
+  renderTaskTable(
+    container,
+    "Tareas que vencen esta semana",
+    groupedTasks.thisWeek,
+    projects,
+    project
+  );
+  renderTaskTable(
+    container,
+    "Tareas que vencen este mes",
+    groupedTasks.thisMonth,
+    projects,
+    project
+  );
+  renderTaskTable(
+    container,
+    "Tareas con fechas posteriores",
+    groupedTasks.later,
+    projects,
+    project
+  );
 
   // Botón para regresar a la lista de proyectos
   const backButton = document.createElement("button");
@@ -333,54 +350,54 @@ function renderTaskTable(container, title, tasks, projects, project) {
  */
 function renderAddCategoryForm(projects, project) {
   const container = document.createElement("div");
-  container.id = "add-category-form-container";
-  container.innerHTML = ""; // Limpiar contenido previo
+  container.className = "form-container";
 
   const title = document.createElement("h2");
-  title.textContent = "Agregar Nueva Categoría";
+  title.textContent = "Registrar Nueva Categoría";
   container.appendChild(title);
 
   const form = document.createElement("form");
-  form.id = "add-category-form";
+  form.className = "form";
 
   // Campo de texto para el nombre de la categoría
-  const nameLabel = document.createElement("label");
-  nameLabel.textContent = "Nombre de la Categoría (obligatorio):";
-  form.appendChild(nameLabel);
+  const categoryLabel = document.createElement("label");
+  categoryLabel.textContent = "Nombre de la Categoría (obligatorio):";
+  form.appendChild(categoryLabel);
 
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.id = "category-name";
-  nameInput.required = true;
-  form.appendChild(nameInput);
+  const categoryInput = document.createElement("input");
+  categoryInput.type = "text";
+  categoryInput.required = true;
+  form.appendChild(categoryInput);
 
-  // Botón para guardar la categoría
+  // Botón guardar
   const saveButton = document.createElement("button");
   saveButton.type = "button";
   saveButton.textContent = "Guardar";
+  saveButton.className = "form-button save-button";
   saveButton.addEventListener("click", () => {
-    const name = nameInput.value.trim();
+    const categoryName = categoryInput.value.trim();
 
-    if (!name) {
+    if (!categoryName) {
       alert('El campo "Nombre de la Categoría" es obligatorio.');
       return;
     }
 
     // Agregar la nueva categoría al proyecto
     project.categories.push({
-      name,
+      name: categoryName,
       tasks: [],
     });
 
-    // Regresar a la lista de categorías y tareas
+    // Regresar a los detalles del proyecto
     renderProjectDetails(projects, project);
   });
   form.appendChild(saveButton);
 
-  // Botón para cancelar y regresar a la lista de categorías y tareas
+  // Botón cancelar
   const cancelButton = document.createElement("button");
   cancelButton.type = "button";
   cancelButton.textContent = "Cancelar";
+  cancelButton.className = "form-button cancel-button";
   cancelButton.addEventListener("click", () => renderProjectDetails(projects, project));
   form.appendChild(cancelButton);
 
@@ -397,7 +414,7 @@ function renderAddCategoryForm(projects, project) {
  */
 function renderAddTaskForm(projects, project) {
   const container = document.createElement("div");
-  container.id = "add-task-form-container";
+  container.className = "form-container";
   container.innerHTML = ""; // Limpiar contenido previo
 
   const title = document.createElement("h2");
@@ -405,34 +422,26 @@ function renderAddTaskForm(projects, project) {
   container.appendChild(title);
 
   const form = document.createElement("form");
-  form.id = "add-task-form";
-
-  // Campo para seleccionar la categoría
-  const categoryLabel = document.createElement("label");
-  categoryLabel.textContent = "Seleccionar Categoría (obligatorio):";
-  form.appendChild(categoryLabel);
-
-  const categorySelect = document.createElement("select");
-  categorySelect.id = "task-category";
-  categorySelect.required = true;
-
-  // Agregar opciones al select con las categorías del proyecto
-  project.categories.forEach((category) => {
-    const option = document.createElement("option");
-    option.value = category.name;
-    option.textContent = category.name;
-    categorySelect.appendChild(option);
-  });
-
-  form.appendChild(categorySelect);
+  form.className = "form";
 
   // Campos para los atributos de la tarea
   const fields = [
+    {
+      label: "Seleccionar Categoría (obligatorio):",
+      id: "task-category",
+      type: "select",
+      options: Object.values(project.categories.map((cat) => cat.name)),
+    },
     { label: "Título (obligatorio):", id: "task-title", type: "text", required: true },
     { label: "Descripción:", id: "task-description", type: "textarea" },
     { label: "Responsable:", id: "task-assignee", type: "text" },
     { label: "Fecha de Vencimiento:", id: "task-dueDate", type: "date" },
-    { label: "Prioridad:", id: "task-priority", type: "text" },
+    {
+      label: "Prioridad:",
+      id: "task-priority",
+      type: "select",
+      options: Object.values(TaskPriority), // Opciones del enumerador TaskPriority
+    },
     { label: "Notas:", id: "task-notes", type: "textarea" },
   ];
 
@@ -441,15 +450,22 @@ function renderAddTaskForm(projects, project) {
     label.textContent = field.label;
     form.appendChild(label);
 
-    const input =
-      field.type === "textarea"
-        ? document.createElement("textarea")
-        : document.createElement("input");
-    if (field.type !== "textarea") {
-      if (input instanceof HTMLInputElement) {
-        input.type = field.type;
-      }
+    let input;
+    if (field.type === "textarea") {
+      input = document.createElement("textarea");
+    } else if (field.type === "select") {
+      input = document.createElement("select");
+      (field.options || []).forEach((optionValue) => {
+        const option = document.createElement("option");
+        option.value = optionValue;
+        option.textContent = optionValue;
+        input.appendChild(option);
+      });
+    } else {
+      input = document.createElement("input");
+      input.type = field.type;
     }
+
     input.id = field.id;
     if (field.required) input.required = true;
     form.appendChild(input);
@@ -459,8 +475,10 @@ function renderAddTaskForm(projects, project) {
   const saveButton = document.createElement("button");
   saveButton.type = "button";
   saveButton.textContent = "Guardar";
+  saveButton.className = "form-button save-button";
   saveButton.addEventListener("click", () => {
-    const categoryName = categorySelect.value;
+    const categoryElement = document.getElementById("task-category");
+    const categoryName = categoryElement instanceof HTMLSelectElement ? categoryElement.value : "";
     const titleElement = document.getElementById("task-title");
     const title = titleElement instanceof HTMLInputElement ? titleElement.value.trim() : "";
     const descriptionElement = document.getElementById("task-description");
@@ -472,8 +490,7 @@ function renderAddTaskForm(projects, project) {
     const dueDateElement = document.getElementById("task-dueDate");
     const dueDate = dueDateElement instanceof HTMLInputElement ? dueDateElement.value.trim() : "";
     const priorityElement = document.getElementById("task-priority");
-    const priority =
-      priorityElement instanceof HTMLInputElement ? priorityElement.value.trim() : "";
+    const priority = priorityElement instanceof HTMLSelectElement ? priorityElement.value : "";
     const notesElement = document.getElementById("task-notes");
     const notes = notesElement instanceof HTMLTextAreaElement ? notesElement.value.trim() : "";
 
@@ -514,6 +531,7 @@ function renderAddTaskForm(projects, project) {
   const cancelButton = document.createElement("button");
   cancelButton.type = "button";
   cancelButton.textContent = "Cancelar";
+  cancelButton.className = "form-button cancel-button";
   cancelButton.addEventListener("click", () => renderProjectDetails(projects, project));
   form.appendChild(cancelButton);
 
