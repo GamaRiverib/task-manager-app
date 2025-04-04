@@ -1,9 +1,11 @@
+/* Estilo general para hacer el sitio responsivo */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   text-align: center;
   background-color: #f4f4f4;
+  box-sizing: border-box; /* Asegura que el padding y el borde se incluyan en el ancho total */
 }
 
 h1 {
@@ -39,7 +41,7 @@ h1 {
 }
 
 .project.add-project h2 {
-  color: #007bff;
+  color: #3A6FE8;
 }
 
 .project p {
@@ -110,7 +112,7 @@ h1 {
 
 /* Botón guardar */
 #add-project-form button[type="button"]:first-of-type {
-  background-color: #007bff;
+  background-color: #3A6FE8;
   color: white;
 }
 
@@ -128,4 +130,240 @@ h1 {
 /* Botones alineados al final */
 #add-project-form {
   align-items: flex-end;
+}
+
+/* Contenedor principal de los detalles del proyecto */
+#project-details-container {
+  max-width: 100%; /* Usar todo el ancho disponible */
+  padding: 10px; /* Reducir el padding */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* Título del proyecto */
+#project-details-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Títulos de las tablas */
+#project-details-container h3 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  color: #3A6FE8;
+  font-size: 18px;
+  border-bottom: 2px solid #3A6FE8;
+  padding-bottom: 5px;
+}
+
+/* Tablas de tareas */
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* Ocultar columnas específicas en pantallas pequeñas */
+@media (max-width: 768px) {
+  .task-table th:nth-child(1), /* Ocultar columna "Categoría" */
+  .task-table th:nth-child(4), /* Ocultar columna "Prioridad" */
+  .task-table td:nth-child(1),
+  .task-table td:nth-child(4) {
+    display: none;
+  }
+
+  /* Ajustar el ancho de las columnas visibles */
+  .task-table th,
+  .task-table td {
+    width: 50%; /* Dividir el espacio entre las columnas visibles */
+  }
+}
+
+.task-table th,
+.task-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.task-table th {
+  background-color: #3A6FE8;
+  color: white;
+  font-weight: bold;
+}
+
+.task-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.task-table tr {
+  cursor: pointer;
+}
+
+.task-table tr:hover {
+  background-color: #e9f5ff;
+}
+
+#project-details-container button:hover {
+  background-color: #0056b3;
+}
+
+/* Botones generales dentro del contenedor de detalles del proyecto */
+#project-details-container > button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background-color: #3A6FE8;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#project-details-container > button:hover {
+  background-color: #0056b3;
+}
+
+/* Contenedor para los botones de acción */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+/* Ajustar los botones de acción en pantallas pequeñas */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column; /* Cambiar a diseño vertical */
+    gap: 10px; /* Espaciado entre botones */
+  }
+
+  .action-button {
+    width: 100%; /* Botones ocupan todo el ancho */
+  }
+}
+
+/* Botones de acción (Agregar Categoría y Agregar Tarea) */
+.action-button {
+  padding: 10px 15px;
+  font-size: 14px;
+  color: white;
+  background-color: #28a745;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #4CAF50;
+}
+
+/* Botón regresar */
+.back-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Ajustar el botón regresar en pantallas pequeñas */
+@media (max-width: 768px) {
+  .back-button {
+    width: 100%; /* Botón ocupa todo el ancho */
+  }
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+/* Contenedor del dropdown */
+.dropdown {
+  position: relative; /* Asegura que el menú se posicione relativo al botón */
+  display: inline-block;
+}
+
+/* Ajustar el diseño del dropdown en pantallas pequeñas */
+@media (max-width: 768px) {
+  .dropdown {
+    width: 100%; /* Asegura que el dropdown ocupe todo el ancho disponible */
+  }
+
+  .dropdown-button {
+    width: 100%; /* Botón ocupa todo el ancho */
+    text-align: center;
+  }
+
+  .dropdown-menu {
+    min-width: 100%; /* Menú ocupa todo el ancho del contenedor */
+  }
+}
+
+/* Botón principal del dropdown */
+.dropdown-button {
+  padding: 10px 15px;
+  font-size: 14px;
+  color: white;
+  background-color: #3A6FE8;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-button:hover {
+  background-color: #0056b3;
+}
+
+/* Menú del dropdown */
+.dropdown-menu {
+  display: none;
+  position: absolute; /* Posiciona el menú relativo al contenedor */
+  top: 100%; /* Asegura que el menú aparezca justo debajo del botón */
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 0; /* Elimina el padding adicional del menú */
+  min-width: 200px;
+  margin: 0; /* Asegura que no haya separación adicional */
+}
+
+/* Mostrar el menú cuando tiene la clase "show" */
+.dropdown-menu.show {
+  display: block;
+}
+
+/* Opciones del menú como texto */
+.dropdown-item {
+  padding: 10px 15px;
+  font-size: 14px;
+  color: #333;
+  background-color: transparent;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  border: none; /* Elimina cualquier borde */
+}
+
+.dropdown-item:hover {
+  /* background-color: #f2f2f2; */
+  color: #000; /* Cambia el color del texto al pasar el cursor */
+  font-weight: bold; /* Opcional: resaltar el texto */
 }

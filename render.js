@@ -1,6 +1,7 @@
 // @ts-check
 
 import { updateURL } from "./navigation.js";
+import { TaskStatus } from "./data.js";
 
 /**
  * @typedef {Function} RenderFunction
@@ -135,7 +136,7 @@ function renderAddProjectForm(projects) {
 }
 
 /**
- * Función para renderizar los detalles de un proyecto
+ * Función para renderizar los detalles de un proyecto con las tareas agrupadas
  * @param {import("./data.js").Project[]} projects
  * @param {import("./data.js").Project} project
  */
@@ -148,56 +149,181 @@ function renderProjectDetails(projects, project) {
   title.textContent = `Proyecto: ${project.name}`;
   container.appendChild(title);
 
-  // Botón para agregar una nueva categoría
-  const addCategoryButton = document.createElement("button");
-  addCategoryButton.textContent = "Agregar Categoría";
-  addCategoryButton.addEventListener("click", () => renderAddCategoryForm(projects, project));
-  container.appendChild(addCategoryButton);
+  // Contenedor para los botones de acción
+  const actionButtonsContainer = document.createElement("div");
+  actionButtonsContainer.className = "action-buttons";
 
-  // Botón para agregar una nueva tarea
-  const addTaskButton = document.createElement("button");
-  addTaskButton.textContent = "Agregar Tarea";
-  addTaskButton.addEventListener("click", () => renderAddTaskForm(projects, project));
-  container.appendChild(addTaskButton);
+  // Botón dropdown
+  const dropdownContainer = document.createElement("div");
+  dropdownContainer.className = "dropdown";
 
-  if (project.categories.length > 0) {
-    project.categories.forEach((category) => {
-      const categoryElement = document.createElement("div");
-      categoryElement.className = "category";
+  const dropdownButton = document.createElement("button");
+  dropdownButton.textContent = "Acciones";
+  dropdownButton.className = "dropdown-button";
+  dropdownContainer.appendChild(dropdownButton);
 
-      const categoryTitle = document.createElement("h3");
-      categoryTitle.textContent = category.name;
-      categoryElement.appendChild(categoryTitle);
+  const dropdownMenu = document.createElement("div");
+  dropdownMenu.className = "dropdown-menu";
 
-      const taskList = document.createElement("ul");
-      category.tasks.forEach((task) => {
-        const taskItem = document.createElement("li");
-        taskItem.innerHTML = `
-          <strong>${task.title}</strong> - ${task.status} - Prioridad: ${task.priority}
-        `;
+  // Opción para agregar una nueva categoría
+  const addCategoryOption = document.createElement("div");
+  addCategoryOption.textContent = "Agregar Categoría";
+  addCategoryOption.className = "dropdown-item";
+  addCategoryOption.addEventListener("click", () => renderAddCategoryForm(projects, project));
+  dropdownMenu.appendChild(addCategoryOption);
 
-        // Agregar evento de clic para mostrar detalles de la tarea
-        taskItem.addEventListener("click", () => renderTaskDetails(projects, project, task));
-        taskList.appendChild(taskItem);
-      });
+  // Opción para agregar una nueva tarea
+  const addTaskOption = document.createElement("div");
+  addTaskOption.textContent = "Agregar Tarea";
+  addTaskOption.className = "dropdown-item";
+  addTaskOption.addEventListener("click", () => renderAddTaskForm(projects, project));
+  dropdownMenu.appendChild(addTaskOption);
 
-      categoryElement.appendChild(taskList);
-      container.appendChild(categoryElement);
-    });
-  } else {
-    const noCategoriesMessage = document.createElement("p");
-    noCategoriesMessage.textContent = "No hay categorías disponibles para este proyecto.";
-    container.appendChild(noCategoriesMessage);
-  }
+  dropdownContainer.appendChild(dropdownMenu);
+  actionButtonsContainer.appendChild(dropdownContainer);
+
+  container.appendChild(actionButtonsContainer);
+
+  // Alternar visibilidad del menú al hacer clic en el botón
+  dropdownButton.addEventListener("click", () => {
+    dropdownMenu.classList.toggle("show");
+  });
+
+  // Cerrar el menú si se hace clic fuera del dropdown
+  document.addEventListener("click", (event) => {
+    // @ts-ignore
+    if (!dropdownContainer.contains(event.target)) {
+      dropdownMenu.classList.remove("show");
+    }
+  });
+
+  // Obtener las tareas agrupadas por fecha
+  const groupedTasks = groupTasksByDate(project);
+
+  // Renderizar las tablas para cada grupo de tareas
+  renderTaskTable(container, "Tareas que vencen hoy", groupedTasks.today, projects, project);
+  renderTaskTable(container, "Tareas que vencen esta semana", groupedTasks.thisWeek, projects, project);
+  renderTaskTable(container, "Tareas que vencen este mes", groupedTasks.thisMonth, projects, project);
+  renderTaskTable(container, "Tareas con fechas posteriores", groupedTasks.later, projects, project);
 
   // Botón para regresar a la lista de proyectos
   const backButton = document.createElement("button");
   backButton.textContent = "Regresar";
+  backButton.className = "back-button";
   backButton.addEventListener("click", () => renderProjects(projects));
   container.appendChild(backButton);
 
   document.body.innerHTML = ""; // Limpiar el contenido de la página
   document.body.appendChild(container);
+}
+
+/**
+ * Función para agrupar las tareas por fecha
+ * @param {import("./data.js").Project} project
+ * @returns {{ today: import("./data.js").Task[], thisWeek: import("./data.js").Task[], thisMonth: import("./data.js").Task[], later: import("./data.js").Task[] }}
+ */
+function groupTasksByDate(project) {
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Primer día de la semana
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Último día de la semana
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // Primer día del mes
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Último día del mes
+
+  /**
+   * @type {{
+   * today: Array<import("./data.js").Task & { category: string }>,
+   * thisWeek: Array<import("./data.js").Task & { category: string }>,
+   * thisMonth: Array<import("./data.js").Task & { category: string }>,
+   * later: Array<import("./data.js").Task & { category: string }>,
+   * }}
+   */
+  const groupedTasks = {
+    today: [],
+    thisWeek: [],
+    thisMonth: [],
+    later: [],
+  };
+
+  project.categories.forEach((category) => {
+    category.tasks.forEach((task) => {
+      const dueDate = new Date(task.dueDate);
+      if (isSameDay(dueDate, today)) {
+        groupedTasks.today.push({ ...task, category: category.name });
+      } else if (dueDate >= startOfWeek && dueDate <= endOfWeek) {
+        groupedTasks.thisWeek.push({ ...task, category: category.name });
+      } else if (dueDate >= startOfMonth && dueDate <= endOfMonth) {
+        groupedTasks.thisMonth.push({ ...task, category: category.name });
+      } else if (dueDate > endOfMonth) {
+        groupedTasks.later.push({ ...task, category: category.name });
+      }
+    });
+  });
+
+  return groupedTasks;
+}
+
+/**
+ * Función para verificar si dos fechas son el mismo día
+ * @param {Date} date1
+ * @param {Date} date2
+ * @returns {boolean}
+ */
+function isSameDay(date1, date2) {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+}
+
+/**
+ * Función para renderizar una tabla de tareas
+ * @param {HTMLElement} container
+ * @param {string} title
+ * @param {import("./data.js").Task[]} tasks
+ * @param {import("./data.js").Project[]} projects
+ * @param {import("./data.js").Project} project
+ */
+function renderTaskTable(container, title, tasks, projects, project) {
+  if (tasks.length === 0) return; // No renderizar si no hay tareas
+
+  const tableTitle = document.createElement("h3");
+  tableTitle.textContent = title;
+  container.appendChild(tableTitle);
+
+  const table = document.createElement("table");
+  table.className = "task-table";
+
+  // Encabezados de la tabla
+  const thead = document.createElement("thead");
+  thead.innerHTML = `
+    <tr>
+      <th>Categoría</th>
+      <th>Título</th>
+      <th>Estatus</th>
+      <th>Prioridad</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  // Cuerpo de la tabla
+  const tbody = document.createElement("tbody");
+  tasks.forEach((task) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${task.category}</td>
+      <td>${task.title}</td>
+      <td>${task.status}</td>
+      <td>${task.priority}</td>
+    `;
+    row.addEventListener("click", () => renderTaskDetails(projects, project, task));
+    tbody.appendChild(row);
+  });
+  table.appendChild(tbody);
+
+  container.appendChild(table);
 }
 
 /**
@@ -306,7 +432,6 @@ function renderAddTaskForm(projects, project) {
     { label: "Descripción:", id: "task-description", type: "textarea" },
     { label: "Responsable:", id: "task-assignee", type: "text" },
     { label: "Fecha de Vencimiento:", id: "task-dueDate", type: "date" },
-    { label: "Estado:", id: "task-status", type: "text" },
     { label: "Prioridad:", id: "task-priority", type: "text" },
     { label: "Notas:", id: "task-notes", type: "textarea" },
   ];
@@ -346,8 +471,6 @@ function renderAddTaskForm(projects, project) {
       assigneeElement instanceof HTMLInputElement ? assigneeElement.value.trim() : "";
     const dueDateElement = document.getElementById("task-dueDate");
     const dueDate = dueDateElement instanceof HTMLInputElement ? dueDateElement.value.trim() : "";
-    const statusElement = document.getElementById("task-status");
-    const status = statusElement instanceof HTMLInputElement ? statusElement.value.trim() : "";
     const priorityElement = document.getElementById("task-priority");
     const priority =
       priorityElement instanceof HTMLInputElement ? priorityElement.value.trim() : "";
@@ -368,7 +491,7 @@ function renderAddTaskForm(projects, project) {
         description,
         assignee,
         dueDate,
-        status,
+        status: TaskStatus.PENDING, // Asignar el estado por defecto
         priority,
         category: categoryName,
         tags: [],
@@ -426,6 +549,20 @@ function renderTaskDetails(projects, project, task) {
     <p><strong>Notas:</strong> ${task.notes}</p>
     <p><strong>Etiquetas:</strong> ${task.tags.join(", ")}</p>
     <p><strong>Comentarios:</strong> ${task.comments.join("; ")}</p>
+    <h3>Subtareas:</h3>
+    <ul>
+      ${task.subtasks
+        .map(
+          (subtask) => `
+        <li>
+          <strong>${subtask.title}</strong>: ${subtask.description} - ${
+            subtask.completed ? "Terminado" : "Pendiente"
+          }
+        </li>
+      `
+        )
+        .join("")}
+    </ul>
   `;
   container.appendChild(details);
 

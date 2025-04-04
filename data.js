@@ -1,6 +1,13 @@
 // @ts-check
 
 /**
+ * @typedef {Object} Subtask
+ * @property {string} title - Título de la subtarea
+ * @property {string} description - Descripción de la subtarea
+ * @property {boolean} completed - Estado de la subtarea (true si está terminada, false si no)
+ */
+
+/**
  * @typedef {Object} Task
  * @property {number} id - ID de la tarea
  * @property {string} title - Título de la tarea
@@ -14,7 +21,7 @@
  * @property {string} createdAt - Fecha de creación de la tarea (formato YYYY-MM-DD)
  * @property {string|null} completedAt - Fecha de finalización de la tarea (formato YYYY-MM-DD) o null si no está completada
  * @property {string[]} comments - Comentarios asociados a la tarea
- * @property {string[]} subtasks - Subtareas asociadas a la tarea
+ * @property {Subtask[]} subtasks - Lista de subtareas asociadas a la tarea
  * @property {number} progress - Progreso de la tarea (0-100%)
  * @property {string[]} attachments - Archivos adjuntos a la tarea
  * @property {string} notes - Notas adicionales sobre la tarea
@@ -34,8 +41,23 @@
  * @property {Category[]} categories - Lista de categorías asociadas al proyecto
  */
 
-export // Datos de muestra
-const projects = [
+/**
+ * Enumerador para los estatus de las tareas
+ */
+export const TaskStatus = {
+  PENDING: "Pendiente",
+  IN_PROGRESS: "En Proceso",
+  COMPLETED: "Completada",
+  CANCELLED: "Cancelada",
+  DELAYED: "Retrasada",
+  ON_HOLD: "En Espera",
+  TO_SCHEDULE: "A Programar",
+  IN_VALIDATION: "En Validación",
+  APPROVED: "Aprobada",
+  FUTURE_TASK: "Tarea Futura",
+};
+
+export const projects = [
   {
     id: 1,
     name: "Proyecto A",
@@ -50,14 +72,17 @@ const projects = [
             description: "Descripción de la tarea 1.1",
             assignee: "Juan Pérez",
             dueDate: "2025-04-10",
-            status: "Pendiente",
+            status: TaskStatus.PENDING, // Usar el enumerador
             priority: "Alta",
             category: "Categoría 1",
             tags: ["importante", "urgente"],
             createdAt: "2025-04-01",
             completedAt: null,
             comments: ["Revisar antes del viernes", "Confirmar con el cliente"],
-            subtasks: ["Subtarea 1.1.1", "Subtarea 1.1.2"],
+            subtasks: [
+              { title: "Subtarea 1.1.1", description: "Descripción de la subtarea 1.1.1", completed: false },
+              { title: "Subtarea 1.1.2", description: "Descripción de la subtarea 1.1.2", completed: false },
+            ],
             progress: 0,
             attachments: ["archivo1.pdf", "imagen1.png"],
             notes: "Esta tarea es prioritaria.",
@@ -68,14 +93,16 @@ const projects = [
             description: "Descripción de la tarea 1.2",
             assignee: "Ana López",
             dueDate: "2025-04-12",
-            status: "En progreso",
+            status: TaskStatus.IN_PROGRESS, // Usar el enumerador
             priority: "Media",
             category: "Categoría 1",
             tags: ["revisión"],
             createdAt: "2025-04-02",
             completedAt: null,
             comments: ["Pendiente de aprobación"],
-            subtasks: ["Subtarea 1.2.1"],
+            subtasks: [
+              { title: "Subtarea 1.2.1", description: "Descripción de la subtarea 1.2.1", completed: false },
+            ],
             progress: 50,
             attachments: [],
             notes: "Revisar avances con el equipo.",
@@ -91,7 +118,7 @@ const projects = [
             description: "Descripción de la tarea 2.1",
             assignee: "Carlos Gómez",
             dueDate: "2025-04-15",
-            status: "Completada",
+            status: TaskStatus.COMPLETED, // Usar el enumerador
             priority: "Baja",
             category: "Categoría 2",
             tags: ["finalizado"],
@@ -121,7 +148,7 @@ const projects = [
             description: "Descripción de la tarea 1.1 en Proyecto B",
             assignee: "Luis Martínez",
             dueDate: "2025-04-20",
-            status: "Pendiente",
+            status: TaskStatus.TO_SCHEDULE, // Usar el enumerador
             priority: "Alta",
             category: "Categoría 1",
             tags: ["urgente"],
