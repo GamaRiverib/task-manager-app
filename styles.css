@@ -188,6 +188,7 @@ h1 {
   font-size: 18px;
   border-bottom: 2px solid #3A6FE8;
   padding-bottom: 5px;
+  text-align: left;
 }
 
 /* Tablas de tareas */
