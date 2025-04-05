@@ -377,7 +377,7 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   padding: 0; /* Elimina el padding adicional del menú */
-  min-width: 200px;
+  min-width: 200%;
   margin: 0; /* Asegura que no haya separación adicional */
 }
 
@@ -389,7 +389,7 @@ h1 {
 /* Opciones del menú como texto */
 .dropdown-item {
   padding: 10px 15px;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
   background-color: transparent;
   text-align: left;

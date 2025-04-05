@@ -1,6 +1,6 @@
 import { renderProjectDetails } from "./project-details.js";
 import { TaskStatus, TaskPriority } from "../firestore-service.js";
-import { updateURL } from "../navigation.js";
+import { updateURL, PAGE_ID } from "../navigation.js";
 import { getTask, updateTask } from "../firestore-service.js";
 import { renderProjects } from "./projects-list.js";
 
@@ -50,6 +50,7 @@ export async function renderTaskDetails(projects, project, tasks, taskId) {
   projectsLink.className = "breadcrumb-item";
   projectsLink.addEventListener("click", () => {
     // Lógica para renderizar la lista de proyectos
+    updateURL({});
     renderProjects(projects);
   });
   breadcrumb.appendChild(projectsLink);
@@ -62,7 +63,10 @@ export async function renderTaskDetails(projects, project, tasks, taskId) {
   const projectLink = document.createElement("span");
   projectLink.textContent = project.name;
   projectLink.className = "breadcrumb-item";
-  projectLink.addEventListener("click", () => renderProjectDetails(projects, project));
+  projectLink.addEventListener("click", () => {
+    updateURL({ page: PAGE_ID.PROJECT_DETAILS, projectId: project.id });
+    renderProjectDetails(projects, project);
+  });
   breadcrumb.appendChild(projectLink);
 
   const separator2 = document.createElement("span");
@@ -88,7 +92,7 @@ export async function renderTaskDetails(projects, project, tasks, taskId) {
   generalTab.textContent = "General";
   generalTab.className = "tab general";
   generalTab.addEventListener("click", () => {
-    updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id, tab: "general" });
+    updateURL({ page: PAGE_ID.TASK_DETAILS, projectId: project.id, taskId: task.id, tab: "general" });
     switchTab("general");
   });
   tabs.appendChild(generalTab);
@@ -97,7 +101,7 @@ export async function renderTaskDetails(projects, project, tasks, taskId) {
   trackingTab.textContent = "Seguimiento";
   trackingTab.className = "tab tracking";
   trackingTab.addEventListener("click", () => {
-    updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id, tab: "tracking" });
+    updateURL({ page: PAGE_ID.TASK_DETAILS, projectId: project.id, taskId: task.id, tab: "tracking" });
     switchTab("tracking");
   });
   tabs.appendChild(trackingTab);
@@ -106,7 +110,7 @@ export async function renderTaskDetails(projects, project, tasks, taskId) {
   subtasksTab.textContent = "Subtareas";
   subtasksTab.className = "tab subtasks";
   subtasksTab.addEventListener("click", () => {
-    updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id, tab: "subtasks" });
+    updateURL({ page: PAGE_ID.TASK_DETAILS, projectId: project.id, taskId: task.id, tab: "subtasks" });
     switchTab("subtasks");
   });
   tabs.appendChild(subtasksTab);
@@ -521,7 +525,10 @@ export async function renderTaskDetails(projects, project, tasks, taskId) {
   cancelButton.type = "button";
   cancelButton.textContent = "Cancelar";
   cancelButton.className = "form-button cancel-button";
-  cancelButton.addEventListener("click", () => renderProjectDetails(projects, project));
+  cancelButton.addEventListener("click", () => {
+    updateURL({ page: PAGE_ID.PROJECT_DETAILS, projectId: project.id });
+    renderProjectDetails(projects, project);
+  });
   form.appendChild(cancelButton);
 
   document.body.innerHTML = ""; // Limpiar el contenido de la página

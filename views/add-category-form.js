@@ -1,6 +1,7 @@
 // @ts-check
 
 import { updateProject } from "../firestore-service.js";
+import { PAGE_ID, updateURL } from "../navigation.js";
 import { renderProjectDetails } from "./project-details.js";
 
 /**
@@ -50,6 +51,7 @@ export function renderAddCategoryForm(projects, project) {
     await updateProject(project);
 
     // Regresar a los detalles del proyecto
+    updateURL({ page: PAGE_ID.PROJECT_DETAILS, projectId: project.id });
     renderProjectDetails(projects, project);
   });
   form.appendChild(saveButton);
@@ -59,7 +61,10 @@ export function renderAddCategoryForm(projects, project) {
   cancelButton.type = "button";
   cancelButton.textContent = "Cancelar";
   cancelButton.className = "form-button cancel-button";
-  cancelButton.addEventListener("click", () => renderProjectDetails(projects, project));
+  cancelButton.addEventListener("click", () => {
+    updateURL({ page: PAGE_ID.PROJECT_DETAILS, projectId: project.id });
+    renderProjectDetails(projects, project);
+  });
   form.appendChild(cancelButton);
 
   container.appendChild(form);

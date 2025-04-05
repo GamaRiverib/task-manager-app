@@ -1,7 +1,7 @@
 // @ts-check
 
 import { getTasks, TaskStatus } from "../firestore-service.js";
-import { updateURL } from "../navigation.js";
+import { PAGE_ID, updateURL } from "../navigation.js";
 import { renderAddCategoryForm } from "./add-category-form.js";
 import { renderAddTaskForm } from "./add-task-form.js";
 import { renderProjects } from "./projects-list.js";
@@ -143,7 +143,10 @@ export async function renderProjectDetails(projects, project) {
   const projectsLink = document.createElement("span");
   projectsLink.textContent = "Proyectos";
   projectsLink.className = "breadcrumb-item";
-  projectsLink.addEventListener("click", () => renderProjects(projects));
+  projectsLink.addEventListener("click", () => {
+    updateURL({ page: null, projectId: null });
+    renderProjects(projects);
+  });
   breadcrumb.appendChild(projectsLink);
 
   const separator = document.createElement("span");
@@ -175,7 +178,7 @@ export async function renderProjectDetails(projects, project) {
   addCategoryOption.textContent = "Agregar Categoría";
   addCategoryOption.className = "dropdown-item";
   addCategoryOption.addEventListener("click", () => {
-    updateURL({ page: "addCategory", projectId: project.id });
+    updateURL({ page: PAGE_ID.ADD_CATEGORY, projectId: project.id });
     renderAddCategoryForm(projects, project);
   });
   dropdownMenu.appendChild(addCategoryOption);
@@ -184,7 +187,7 @@ export async function renderProjectDetails(projects, project) {
   addTaskOption.textContent = "Agregar Tarea";
   addTaskOption.className = "dropdown-item";
   addTaskOption.addEventListener("click", () => {
-    updateURL({ page: "addTask", projectId: project.id });
+    updateURL({ page: PAGE_ID.ADD_TASK, projectId: project.id });
     renderAddTaskForm(projects, project, tasks);
   });
   dropdownMenu.appendChild(addTaskOption);
@@ -215,7 +218,7 @@ export async function renderProjectDetails(projects, project) {
     addTaskLink.textContent = "Haz clic aquí para agregar una tarea.";
     addTaskLink.addEventListener("click", (event) => {
       event.preventDefault();
-      updateURL({ page: "addTask", projectId: project.id });
+      updateURL({ page: PAGE_ID.ADD_TASK, projectId: project.id });
       renderAddTaskForm(projects, project, tasks);
     });
 

@@ -1,6 +1,6 @@
 // @ts-check
 
-import { updateURL } from "../navigation.js";
+import { PAGE_ID, updateURL } from "../navigation.js";
 import { renderProjectDetails } from "./project-details.js";
 import { renderAddProjectForm } from "./add-project-form.js";
 
@@ -24,7 +24,7 @@ export function renderProjects(projects) {
   addProjectElement.className = "project add-project";
   addProjectElement.innerHTML = `<h2>➕ Agregar Nuevo</h2>`;
   addProjectElement.addEventListener("click", () => {
-    updateURL({ page: "addProject" });
+    updateURL({ page: PAGE_ID.ADD_PROJECT });
     renderAddProjectForm(projects);
   });
   container.appendChild(addProjectElement);
@@ -34,7 +34,7 @@ export function renderProjects(projects) {
     projectElement.className = "project";
     projectElement.innerHTML = `<h2>${project.name}</h2><p>${project.description}</p>`;
     projectElement.addEventListener("click", () => {
-      updateURL({ page: "projectDetails", projectId: project.id });
+      updateURL({ page: PAGE_ID.PROJECT_DETAILS, projectId: project.id });
       renderProjectDetails(projects, project);
     });
     container.appendChild(projectElement);

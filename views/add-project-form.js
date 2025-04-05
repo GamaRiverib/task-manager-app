@@ -1,6 +1,7 @@
 // @ts-check
 
 import { createProject } from "../firestore-service.js";
+import { updateURL } from "../navigation.js";
 import { renderProjects } from "./projects-list.js";
 
 /**
@@ -55,6 +56,7 @@ export function renderAddProjectForm(projects) {
 
     projects.push(project);
 
+    updateURL({});
     renderProjects(projects);
   });
   form.appendChild(saveButton);
@@ -63,7 +65,10 @@ export function renderAddProjectForm(projects) {
   cancelButton.type = "button";
   cancelButton.textContent = "Cancelar";
   cancelButton.className = "form-button cancel-button";
-  cancelButton.addEventListener("click", () => renderProjects(projects));
+  cancelButton.addEventListener("click", () => {
+    updateURL({});
+    renderProjects(projects);
+  });
   form.appendChild(cancelButton);
 
   container.appendChild(form);

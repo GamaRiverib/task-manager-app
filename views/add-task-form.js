@@ -1,6 +1,7 @@
 // @ts-check
 
 import { createTask, TaskPriority, TaskStatus } from "../firestore-service.js";
+import { PAGE_ID, updateURL } from "../navigation.js";
 import { renderProjectDetails } from "./project-details.js";
 
 /**
@@ -117,6 +118,7 @@ export function renderAddTaskForm(projects, project, tasks) {
     tasks.push(task); // Agregar la tarea a la lista de tareas del proyecto
 
     // Regresar a la lista de categorías y tareas
+    updateURL({ page: PAGE_ID.PROJECT_DETAILS, projectId: project.id });
     renderProjectDetails(projects, project);
   });
   form.appendChild(saveButton);
@@ -126,7 +128,10 @@ export function renderAddTaskForm(projects, project, tasks) {
   cancelButton.type = "button";
   cancelButton.textContent = "Cancelar";
   cancelButton.className = "form-button cancel-button";
-  cancelButton.addEventListener("click", () => renderProjectDetails(projects, project));
+  cancelButton.addEventListener("click", () => {
+    updateURL({ page: PAGE_ID.PROJECT_DETAILS, projectId: project.id });
+    renderProjectDetails(projects, project);
+  });
   form.appendChild(cancelButton);
 
   container.appendChild(form);
