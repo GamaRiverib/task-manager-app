@@ -1,6 +1,6 @@
 // @ts-check
 
-import { getTasks } from "../firestore-service.js";
+import { getTasks, TaskStatus } from "../firestore-service.js";
 import { updateURL } from "../navigation.js";
 import { renderAddCategoryForm } from "./add-category-form.js";
 import { renderAddTaskForm } from "./add-task-form.js";
@@ -23,6 +23,13 @@ function groupTasksByDate(project, tasks) {
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Último día del mes
 
   /**
+   * @type {import("../firestore-service.js").TaskDto[]}
+   */
+  const filteredTasks = tasks.filter(
+    (task) => task.status !== TaskStatus.COMPLETED && task.status !== TaskStatus.CANCELLED
+  );
+
+  /**
    * @type {{
    * today: Array<import("../firestore-service.js").TaskDto>,
    * thisWeek: Array<import("../firestore-service.js").TaskDto>,
@@ -37,7 +44,7 @@ function groupTasksByDate(project, tasks) {
     later: [],
   };
 
-  tasks.forEach((task) => {
+  filteredTasks.forEach((task) => {
     const dueDate = new Date(task.dueDate);
     if (isSameDay(dueDate, today)) {
       groupedTasks.today.push({ ...task });
@@ -107,7 +114,7 @@ function renderTaskTable(container, title, tasks, projects, project) {
     `;
     row.addEventListener("click", () => {
       updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id });
-      renderTaskDetails(projects, project, task.id);
+      renderTaskDetails(projects, project, tasks, task.id);
     });
     tbody.appendChild(row);
   });

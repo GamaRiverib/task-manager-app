@@ -1,10 +1,23 @@
-// @ts-check
-
 import { renderProjectDetails } from "./project-details.js";
 import { TaskStatus, TaskPriority } from "../firestore-service.js";
 import { updateURL } from "../navigation.js";
 import { getTask, updateTask } from "../firestore-service.js";
 import { renderProjects } from "./projects-list.js";
+
+const fieldToTaskMap = {
+  "task-status": "status",
+  "task-priority": "priority",
+  "task-progress": "progress",
+  "task-tags": "tags",
+  "task-comments": "comments",
+  "task-notes": "notes",
+  "task-category": "category",
+  "task-title": "title",
+  "task-description": "description",
+  "task-assignee": "assignee",
+  "task-createdAt": "createdAt",
+  "task-dueDate": "dueDate",
+};
 
 /**
  * Función para renderizar y editar los detalles de una tarea
@@ -12,7 +25,7 @@ import { renderProjects } from "./projects-list.js";
  * @param {import("../firestore-service.js").Project} project
  * @param {string} taskId
  */
-export async function renderTaskDetails(projects, project, taskId) {
+export async function renderTaskDetails(projects, project, tasks, taskId) {
   /**
    * @type {import("../firestore-service.js").Task | null}
    */
@@ -400,7 +413,10 @@ export async function renderTaskDetails(projects, project, taskId) {
     }
   });
 
-  // Función para recalcular el progreso de la tarea
+  /**
+   * Función para recalcular el progreso de la tarea
+   * @param {import("../firestore-service.js").Task} task 
+   */
   function updateTaskProgress(task) {
     const totalSubtasks = task.subtasks.length;
     const completedSubtasks = task.subtasks.filter((subtask) => subtask.completed).length;
@@ -417,6 +433,46 @@ export async function renderTaskDetails(projects, project, taskId) {
     if (progressLabel) {
       progressLabel.textContent = `${fieldInfo?.label} (${task.progress}%):`;
     }
+  }
+
+  /**
+   * Actualiza los atributos de la tarea con los valores del formulario
+   * @param {import("../firestore-service.js").Task} task - Objeto de la tarea
+   * @param {HTMLElement} generalSection - Sección del formulario con campos generales
+   * @param {HTMLElement} trackingSection - Sección del formulario con campos de seguimiento
+   */
+  function updateTaskFromForm(task, generalSection, trackingSection) {
+    // Actualizar campos generales
+    const generalFields = generalSection.querySelectorAll("input, textarea, select");
+    generalFields.forEach((field) => {
+      const taskAttribute = fieldToTaskMap[field.id]; // Obtener el atributo correspondiente
+      if (taskAttribute) {
+        if (field.type === "checkbox") {
+          task[taskAttribute] = field.checked;
+        } else if (field.type === "select" && taskAttribute === "tags") {
+          task[taskAttribute] = field.value.split(",").map((tag) => tag.trim()); // Convertir a array
+        } else {
+          task[taskAttribute] = field.value;
+        }
+      }
+    });
+
+    // Actualizar campos de seguimiento
+    const trackingFields = trackingSection.querySelectorAll("input, textarea, select");
+    trackingFields.forEach((field) => {
+      const taskAttribute = fieldToTaskMap[field.id]; // Obtener el atributo correspondiente
+      if (taskAttribute) {
+        if (field.type === "checkbox") {
+          task[taskAttribute] = field.checked;
+        } else if (field.type === "range") {
+          task[taskAttribute] = parseInt(field.value, 10); // Convertir a número si es un slider
+        } else if (field.type === "text" && taskAttribute === "tags") {
+          task[taskAttribute] = field.value.split(",").map((tag) => tag.trim()); // Convertir a array
+        } else {
+          task[taskAttribute] = field.value;
+        }
+      }
+    });
   }
 
   // Agregar el formulario y la lista al contenedor de subtareas
@@ -441,7 +497,17 @@ export async function renderTaskDetails(projects, project, taskId) {
   saveButton.className = "form-button save-button";
   saveButton.addEventListener("click", async () => {
     try {
+      // Actualizar los atributos de la tarea con los valores del formulario
+      updateTaskFromForm(task, generalSection, trackingSection);
+
+      console.log(task); // Verificar los cambios en la consola
       await updateTask(project.id, task); // Guardar los cambios en Firestore
+      const index = tasks.findIndex((t) => t.id === task.id);
+      if (index !== -1) {
+        tasks[index] = task; // Actualizar la tarea en la lista de tareas
+      } else {
+        tasks.push(task); // Si no se encuentra, agregar la tarea a la lista
+      }
       alert("Tarea actualizada correctamente.");
     } catch (error) {
       console.error("Error al actualizar la tarea:", error);

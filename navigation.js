@@ -52,7 +52,7 @@ export function handleNavigation(projects, renderFunctions) {
   } else if (page === "taskDetails" && projectId && taskId) {
     const project = projects.find((p) => p.id === projectId);
     if (project) {
-      renderFunctions.renderTaskDetails(projects, project, taskId);
+      renderFunctions.renderTaskDetails(projects, project, [], taskId);
     } else {
       renderFunctions.renderProjects(projects);
     }

@@ -212,10 +212,8 @@ h1 {
 
 /* Ocultar columnas específicas en pantallas pequeñas */
 @media (max-width: 768px) {
-  .task-table th:nth-child(1), /* Ocultar columna "Categoría" */
-  .task-table th:nth-child(4), /* Ocultar columna "Prioridad" */
-  .task-table td:nth-child(1),
-  .task-table td:nth-child(4) {
+  .task-table th:nth-child(3), /* Ocultar columna "Prioridad" */
+  .task-table td:nth-child(3) {
     display: none;
   }
 
