@@ -1,14 +1,15 @@
 // @ts-check
 
-import { TaskPriority, TaskStatus } from "../data.js";
+import { addTask, TaskPriority, TaskStatus } from "../firestore-service.js";
 import { renderProjectDetails } from "./project-details.js";
 
 /**
  * Función para renderizar el formulario para agregar una nueva tarea
- * @param {import("../data.js").Project[]} projects
- * @param {import("../data.js").Project} project
+ * @param {import("../firestore-service.js").Project[]} projects
+ * @param {import("../firestore-service.js").Project} project
+ * @param {(import("../firestore-service.js").Task | import("../firestore-service.js").TaskDto)[]} tasks
  */
-export function renderAddTaskForm(projects, project) {
+export function renderAddTaskForm(projects, project, tasks) {
   const container = document.createElement("div");
   container.className = "form-container";
   container.innerHTML = ""; // Limpiar contenido previo
@@ -72,7 +73,7 @@ export function renderAddTaskForm(projects, project) {
   saveButton.type = "button";
   saveButton.textContent = "Guardar";
   saveButton.className = "form-button save-button";
-  saveButton.addEventListener("click", () => {
+  saveButton.addEventListener("click", async () => {
     const categoryElement = document.getElementById("task-category");
     const categoryName = categoryElement instanceof HTMLSelectElement ? categoryElement.value : "";
     const titleElement = document.getElementById("task-title");
@@ -95,28 +96,25 @@ export function renderAddTaskForm(projects, project) {
       return;
     }
 
-    // Buscar la categoría seleccionada y agregar la tarea
-    const category = project.categories.find((cat) => cat.name === categoryName);
-    if (category) {
-      category.tasks.push({
-        id: Date.now(), // Generar un ID único
-        title,
-        description,
-        assignee,
-        dueDate,
-        status: TaskStatus.PENDING, // Asignar el estado por defecto
-        priority,
-        category: categoryName,
-        tags: [],
-        createdAt: new Date().toISOString().split("T")[0],
-        completedAt: null,
-        comments: [],
-        subtasks: [],
-        progress: 0,
-        attachments: [],
-        notes,
-      });
-    }
+    const task = await addTask(project.id, {
+      title,
+      description,
+      assignee,
+      dueDate,
+      status: TaskStatus.PENDING, // Asignar el estado por defecto
+      priority,
+      category: categoryName,
+      tags: [],
+      createdAt: new Date().toISOString().split("T")[0],
+      completedAt: null,
+      comments: [],
+      subtasks: [],
+      progress: 0,
+      attachments: [],
+      notes,
+    });
+
+    tasks.push(task); // Agregar la tarea a la lista de tareas del proyecto
 
     // Regresar a la lista de categorías y tareas
     renderProjectDetails(projects, project);

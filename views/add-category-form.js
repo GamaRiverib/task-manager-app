@@ -1,11 +1,12 @@
 // @ts-check
 
+import { updateProject } from "../firestore-service.js";
 import { renderProjectDetails } from "./project-details.js";
 
 /**
  * Función para renderizar el formulario para agregar una nueva categoría
- * @param {import("../data.js").Project[]} projects
- * @param {import("../data.js").Project} project
+ * @param {import("../firestore-service.js").Project[]} projects
+ * @param {import("../firestore-service.js").Project} project
  */
 export function renderAddCategoryForm(projects, project) {
   const container = document.createElement("div");
@@ -33,7 +34,7 @@ export function renderAddCategoryForm(projects, project) {
   saveButton.type = "button";
   saveButton.textContent = "Guardar";
   saveButton.className = "form-button save-button";
-  saveButton.addEventListener("click", () => {
+  saveButton.addEventListener("click", async () => {
     const categoryName = categoryInput.value.trim();
 
     if (!categoryName) {
@@ -44,8 +45,9 @@ export function renderAddCategoryForm(projects, project) {
     // Agregar la nueva categoría al proyecto
     project.categories.push({
       name: categoryName,
-      tasks: [],
     });
+
+    await updateProject(project);
 
     // Regresar a los detalles del proyecto
     renderProjectDetails(projects, project);

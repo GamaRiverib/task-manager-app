@@ -1,16 +1,26 @@
 // @ts-check
 
 import { renderProjectDetails } from "./project-details.js";
-import { TaskStatus, TaskPriority } from "../data.js";
+import { TaskStatus, TaskPriority } from "../firestore-service.js";
 import { updateURL } from "../navigation.js";
+import { getTask, updateTask } from "../firestore-service.js";
 
 /**
  * Función para renderizar y editar los detalles de una tarea
- * @param {import("../data.js").Project[]} projects
- * @param {import("../data.js").Project} project
- * @param {import("../data.js").Task} task
+ * @param {import("../firestore-service.js").Project[]} projects
+ * @param {import("../firestore-service.js").Project} project
+ * @param {string} taskId
  */
-export function renderTaskDetails(projects, project, task) {
+export async function renderTaskDetails(projects, project, taskId) {
+  /**
+   * @type {import("../firestore-service.js").Task | null}
+   */
+  const task = await getTask(project.id, taskId);
+  if (!task) {
+    // TODO: Mostrar un mensaje de error o redirigir a la lista de tareas
+    console.error("Tarea no encontrada:", taskId);
+    return;
+  }
   const container = document.createElement("div");
   container.className = "form-container";
   container.id = "task-details-container";
@@ -104,13 +114,13 @@ export function renderTaskDetails(projects, project, task) {
 
   // Campos para Información General
   const generalFields = [
-    { label: "ID:", id: "task-id", type: "text", value: task.id, readonly: true },
+    // { label: "ID:", id: "task-id", type: "text", value: task.id, readonly: true },
     {
       label: "Categoría:",
       id: "task-category",
-      type: "text",
+      type: "select",
       value: task.category || "",
-      readonly: true,
+      options: Object.values(project.categories.map((cat) => cat.name)),
     },
     {
       label: "Título (obligatorio):",
@@ -145,6 +155,14 @@ export function renderTaskDetails(projects, project, task) {
     if (field.type === "textarea") {
       input = document.createElement("textarea");
       input.value = String(field.value);
+    } else if (field.type === "select") {
+      input = document.createElement("select");
+      (field.options || []).forEach((optionValue) => {
+        const option = document.createElement("option");
+        option.value = optionValue;
+        option.textContent = optionValue;
+        input.appendChild(option);
+      });
     } else {
       input = document.createElement("input");
       input.type = field.type;
@@ -152,6 +170,7 @@ export function renderTaskDetails(projects, project, task) {
     }
 
     input.id = field.id;
+    // @ts-ignore
     if (field.readonly) input.readOnly = true;
     if (field.required) input.required = true;
     generalSection.appendChild(input);
@@ -232,6 +251,8 @@ export function renderTaskDetails(projects, project, task) {
         task.progress = parseInt(sliderValue, 10); // Actualizar el progreso en el objeto `task`
       });
 
+      label.textContent = `${field.label} (${task.progress}%):`;
+
       // trackingSection.appendChild(progressValue);
     } else {
       input = document.createElement("input");
@@ -240,6 +261,7 @@ export function renderTaskDetails(projects, project, task) {
     }
 
     input.id = field.id;
+    label.htmlFor = field.id;
     if (field.required) input.required = true;
     trackingSection.appendChild(input);
   });
@@ -262,37 +284,43 @@ export function renderTaskDetails(projects, project, task) {
   const subtasksList = document.createElement("ul");
   subtasksList.className = "subtasks-list";
 
+  // Mensaje si no hay subtareas
+  const noSubtasksMessage = document.createElement("p");
+  noSubtasksMessage.className = "no-subtasks-message";
+
   // Verificar si hay subtareas
-  if (task.subtasks.length === 0) {
-    const noSubtasksMessage = document.createElement("p");
-    noSubtasksMessage.className = "no-subtasks-message";
-    noSubtasksMessage.textContent = "No hay subtareas. Agrega una nueva subtarea para comenzar.";
-    subtasksSection.appendChild(noSubtasksMessage);
-  } else {
-    task.subtasks.forEach((subtask, index) => {
-      const listItem = document.createElement("li");
-      listItem.className = "subtask-item";
+  task.subtasks.forEach((subtask, index) => {
+    const listItem = document.createElement("li");
+    listItem.className = "subtask-item";
 
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = subtask.completed;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = subtask.completed;
 
-      // Actualizar el estado de la subtarea al cambiar la casilla
-      checkbox.addEventListener("change", (event) => {
-        // @ts-ignore
-        const isChecked = event.target?.checked ?? false;
-        task.subtasks[index].completed = isChecked;
-      });
+    // Actualizar el estado de la subtarea al cambiar la casilla
+    checkbox.addEventListener("change", async (event) => {
+      // @ts-ignore
+      const isChecked = event.target?.checked ?? false;
+      task.subtasks[index].completed = isChecked;
 
-      const title = document.createElement("span");
-      title.textContent = subtask.title;
-      title.title = subtask.description || "Sin descripción"; // Mostrar la descripción como tooltip
+      // Recalcular el progreso de la tarea
+      updateTaskProgress(task);
 
-      listItem.appendChild(checkbox);
-      listItem.appendChild(title);
-      subtasksList.appendChild(listItem);
+      try {
+        await updateTask(project.id, task); // Guardar el progreso actualizado en Firestore
+      } catch (error) {
+        console.error("Error al actualizar el progreso de la tarea:", error);
+      }
     });
-  }
+
+    const title = document.createElement("span");
+    title.textContent = subtask.title;
+    title.title = subtask.description || "Sin descripción"; // Mostrar la descripción como tooltip
+
+    listItem.appendChild(checkbox);
+    listItem.appendChild(title);
+    subtasksList.appendChild(listItem);
+  });
 
   // Agregar la lista al contenedor de subtareas
   subtasksSection.appendChild(subtasksList);
@@ -308,7 +336,7 @@ export function renderTaskDetails(projects, project, task) {
   addSubtaskButton.className = "form-button add-button";
 
   // Evento para agregar una nueva subtarea
-  addSubtaskButton.addEventListener("click", () => {
+  addSubtaskButton.addEventListener("click", async () => {
     const newSubtaskTitle = subtaskInput.value.trim();
     if (newSubtaskTitle === "") {
       alert("El título de la subtarea no puede estar vacío.");
@@ -325,38 +353,75 @@ export function renderTaskDetails(projects, project, task) {
     // Agregar la nueva subtarea al objeto `task`
     task.subtasks.push(newSubtask);
 
-    // Actualizar la lista de subtareas en la interfaz
-    const listItem = document.createElement("li");
-    listItem.className = "subtask-item";
+    try {
+      await updateTask(project.id, task); // Actualizar subtareas en Firestore
+      const listItem = document.createElement("li");
+      listItem.className = "subtask-item";
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = newSubtask.completed;
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = newSubtask.completed;
 
-    // Actualizar el estado de la subtarea al cambiar la casilla
-    checkbox.addEventListener("change", (event) => {
-      // @ts-ignore
-      const isChecked = event.target.checked;
-      newSubtask.completed = isChecked;
-    });
+      checkbox.addEventListener("change", async (event) => {
+        // @ts-ignore
+        const isChecked = event.target.checked;
+        newSubtask.completed = isChecked;
 
-    const title = document.createElement("span");
-    title.textContent = newSubtask.title;
-    title.title = newSubtask.description || "Sin descripción"; // Mostrar la descripción como tooltip
+        // Recalcular el progreso de la tarea
+        updateTaskProgress(task);
 
-    listItem.appendChild(checkbox);
-    listItem.appendChild(title);
-    subtasksList.appendChild(listItem);
+        try {
+          await updateTask(project.id, task); // Guardar el progreso actualizado en Firestore
+        } catch (error) {
+          console.error("Error al actualizar el progreso de la tarea:", error);
+        }
+      });
 
-    // Limpiar el campo de entrada
-    subtaskInput.value = "";
+      const title = document.createElement("span");
+      title.textContent = newSubtask.title;
+      title.title = newSubtask.description || "Sin descripción";
+
+      listItem.appendChild(checkbox);
+      listItem.appendChild(title);
+      subtasksList.appendChild(listItem);
+
+      noSubtasksMessage.textContent = "";
+      subtaskInput.value = "";
+    } catch (error) {
+      console.error("Error al agregar la subtarea:", error);
+      alert("Hubo un error al agregar la subtarea.");
+    }
   });
+
+  // Función para recalcular el progreso de la tarea
+  function updateTaskProgress(task) {
+    const totalSubtasks = task.subtasks.length;
+    const completedSubtasks = task.subtasks.filter((subtask) => subtask.completed).length;
+    task.progress = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+
+    // Actualizar el valor del slider de progreso en la interfaz
+    const fieldInfo = trackingFields.find((field) => field.id === "task-progress");
+    const progressInput = document.getElementById("task-progress");
+    const progressLabel = document.querySelector("label[for='task-progress']");
+    if (progressInput) {
+      // @ts-ignore
+      progressInput.value = task.progress;
+    }
+    if (progressLabel) {
+      progressLabel.textContent = `${fieldInfo?.label} (${task.progress}%):`;
+    }
+  }
 
   // Agregar el formulario y la lista al contenedor de subtareas
   addSubtaskForm.appendChild(subtaskInput);
   addSubtaskForm.appendChild(addSubtaskButton);
   subtasksSection.appendChild(subtasksTitle);
   subtasksSection.appendChild(subtasksList);
+
+  if (task.subtasks.length === 0) {
+    noSubtasksMessage.textContent = "No hay subtareas. Agrega una nueva subtarea para comenzar.";
+    subtasksSection.appendChild(noSubtasksMessage);
+  }
 
   form.appendChild(generalSection);
   form.appendChild(trackingSection);
@@ -367,8 +432,14 @@ export function renderTaskDetails(projects, project, task) {
   saveButton.type = "button";
   saveButton.textContent = "Actualizar";
   saveButton.className = "form-button save-button";
-  saveButton.addEventListener("click", () => {
-    // Implementar lógica para guardar cambios
+  saveButton.addEventListener("click", async () => {
+    try {
+      await updateTask(project.id, task); // Guardar los cambios en Firestore
+      alert("Tarea actualizada correctamente.");
+    } catch (error) {
+      console.error("Error al actualizar la tarea:", error);
+      alert("Hubo un error al actualizar la tarea.");
+    }
   });
   form.appendChild(saveButton);
 

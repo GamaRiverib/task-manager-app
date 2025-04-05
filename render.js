@@ -9,9 +9,9 @@ import { renderTaskDetails } from "./views/task-details.js";
 
 /**
  * @typedef {Function} RenderFunction
- * @param {import("./data.js").Project[]} projects - Lista de proyectos
- * @param {import("./data.js").Project} [project] - Proyecto actual
- * @param {import("./data.js").Task} [task] - Tarea actual
+ * @param {import("./firestore-service.js").Project[]} projects - Lista de proyectos
+ * @param {import("./firestore-service.js").Project} [project] - Proyecto actual
+ * @param {import("./firestore-service.js").Task} [task] - Tarea actual
  */
 
 /**

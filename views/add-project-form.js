@@ -1,10 +1,11 @@
 // @ts-check
 
+import { saveProject } from "../firestore-service.js";
 import { renderProjects } from "./projects-list.js";
 
 /**
  * Función para renderizar el formulario para agregar un nuevo proyecto
- * @param {import("../data.js").Project[]} projects
+ * @param {import("../firestore-service.js").Project[]} projects
  */
 export function renderAddProjectForm(projects) {
   const container = document.createElement("div");
@@ -37,7 +38,7 @@ export function renderAddProjectForm(projects) {
   saveButton.type = "button";
   saveButton.textContent = "Guardar";
   saveButton.className = "form-button save-button";
-  saveButton.addEventListener("click", () => {
+  saveButton.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const description = descriptionInput.value.trim();
 
@@ -46,12 +47,13 @@ export function renderAddProjectForm(projects) {
       return;
     }
 
-    projects.push({
-      id: projects.length + 1,
+    const project = await saveProject({
       name,
       description,
       categories: [],
     });
+
+    projects.push(project);
 
     renderProjects(projects);
   });
