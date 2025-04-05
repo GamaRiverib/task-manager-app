@@ -125,12 +125,30 @@ export async function renderProjectDetails(projects, project) {
   const tasks = await getTasks(project.id);
 
   const container = document.createElement("div");
+  container.className = "container";
   container.id = "project-details-container";
   container.innerHTML = "";
 
-  const title = document.createElement("h2");
-  title.textContent = project.name;
-  container.appendChild(title);
+  // Crear el breadcrumb
+  const breadcrumb = document.createElement("nav");
+  breadcrumb.className = "breadcrumb";
+
+  const projectsLink = document.createElement("span");
+  projectsLink.textContent = "Proyectos";
+  projectsLink.className = "breadcrumb-item";
+  projectsLink.addEventListener("click", () => renderProjects(projects));
+  breadcrumb.appendChild(projectsLink);
+
+  const separator = document.createElement("span");
+  separator.textContent = " > ";
+  breadcrumb.appendChild(separator);
+
+  const projectName = document.createElement("span");
+  projectName.textContent = project.name;
+  projectName.className = "breadcrumb-item active";
+  breadcrumb.appendChild(projectName);
+
+  container.appendChild(breadcrumb);
 
   const actionButtonsContainer = document.createElement("div");
   actionButtonsContainer.className = "action-buttons";
@@ -221,31 +239,8 @@ export async function renderProjectDetails(projects, project) {
       projects,
       project
     );
-    /* const backButton = document.createElement("button");
-      backButton.textContent = "Regresar";
-      backButton.className = "back-button";
-      backButton.addEventListener("click", () => renderProjects(projects));
-      container.appendChild(backButton); */
-
-    // Verificar si el proyecto tiene categorías
-    /* if (project.categories.length === 0) {
-        const noCategoriesMessage = document.createElement("p");
-        noCategoriesMessage.className = "no-categories-message";
-        noCategoriesMessage.textContent = "Este proyecto no tiene categorías. ";
-
-        const addCategoryLink = document.createElement("a");
-        addCategoryLink.href = "#";
-        addCategoryLink.textContent = "Haz clic aquí para agregar una categoría.";
-        addCategoryLink.addEventListener("click", (event) => {
-          event.preventDefault();
-          updateURL({ page: "addCategory", projectId: project.id });
-          renderAddCategoryForm(projects, project);
-        });
-
-        noCategoriesMessage.appendChild(addCategoryLink);
-        container.appendChild(noCategoriesMessage);
-      } else { */
   }
+
   document.body.innerHTML = "";
   document.body.appendChild(container);
 }

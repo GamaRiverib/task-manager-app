@@ -12,16 +12,17 @@ export function renderProjects(projects) {
   updateURL({ page: null, projectId: null });
 
   const container = document.createElement("div");
+  container.className = "container";
   container.id = "projects-container";
   container.innerHTML = "";
 
   const title = document.createElement("h1");
-  title.textContent = "Lista de Proyectos";
+  title.textContent = "Proyectos";
   container.appendChild(title);
 
   const addProjectElement = document.createElement("div");
   addProjectElement.className = "project add-project";
-  addProjectElement.innerHTML = `<h2>+ Agregar Nuevo Proyecto</h2>`;
+  addProjectElement.innerHTML = `<h2>➕ Agregar Nuevo</h2>`;
   addProjectElement.addEventListener("click", () => {
     updateURL({ page: "addProject" });
     renderAddProjectForm(projects);

@@ -4,6 +4,7 @@ import { renderProjectDetails } from "./project-details.js";
 import { TaskStatus, TaskPriority } from "../firestore-service.js";
 import { updateURL } from "../navigation.js";
 import { getTask, updateTask } from "../firestore-service.js";
+import { renderProjects } from "./projects-list.js";
 
 /**
  * Función para renderizar y editar los detalles de una tarea
@@ -30,26 +31,32 @@ export async function renderTaskDetails(projects, project, taskId) {
   const breadcrumb = document.createElement("nav");
   breadcrumb.className = "breadcrumb";
 
+  // Enlace a la lista de proyectos
+  const projectsLink = document.createElement("span");
+  projectsLink.textContent = "Proyectos";
+  projectsLink.className = "breadcrumb-item";
+  projectsLink.addEventListener("click", () => {
+    // Lógica para renderizar la lista de proyectos
+    renderProjects(projects);
+  });
+  breadcrumb.appendChild(projectsLink);
+
+  const separator1 = document.createElement("span");
+  separator1.textContent = " > ";
+  breadcrumb.appendChild(separator1);
+
+  // Enlace al proyecto actual
   const projectLink = document.createElement("span");
   projectLink.textContent = project.name;
   projectLink.className = "breadcrumb-item";
   projectLink.addEventListener("click", () => renderProjectDetails(projects, project));
   breadcrumb.appendChild(projectLink);
 
-  const separator1 = document.createElement("span");
-  separator1.textContent = " > ";
-  breadcrumb.appendChild(separator1);
-
-  const categoryName = task.category || "Sin Categoría";
-  const categoryLink = document.createElement("span");
-  categoryLink.textContent = categoryName;
-  categoryLink.className = "breadcrumb-item";
-  breadcrumb.appendChild(categoryLink);
-
   const separator2 = document.createElement("span");
   separator2.textContent = " > ";
   breadcrumb.appendChild(separator2);
 
+  // Nombre de la tarea actual
   const taskTitle = document.createElement("span");
   taskTitle.textContent = task.title;
   taskTitle.className = "breadcrumb-item active";
@@ -65,7 +72,7 @@ export async function renderTaskDetails(projects, project, taskId) {
   tabs.className = "tabs";
 
   const generalTab = document.createElement("li");
-  generalTab.textContent = "Información General";
+  generalTab.textContent = "General";
   generalTab.className = "tab general";
   generalTab.addEventListener("click", () => {
     updateURL({ page: "taskDetails", projectId: project.id, taskId: task.id, tab: "general" });
