@@ -1,5 +1,5 @@
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-import { db } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 
 /**
  * @typedef {Object} Subtask
@@ -76,31 +76,29 @@ export const TaskPriority = {
 };
 
 /**
- * Obtener todos los proyectos
+ * Obtener proyectos del usuario autenticado
  * @returns {Promise<Project[]>} Lista de proyectos
  */
 export async function getProjects() {
-  const projectsCollection = collection(db, "projects");
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuario no autenticado");
+
+  const projectsCollection = collection(db, `users/${user.uid}/projects`);
   const snapshot = await getDocs(projectsCollection);
-  return snapshot.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      name: data.name || "",
-      description: data.description || "",
-      categories: data.categories || [],
-    };
-  });
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
 /**
- * Registrar un nuevo proyecto
+ * Crear un nuevo proyecto
  * @param {Omit<Project, "id">} projectData
  * @returns {Promise<Project>} Proyecto guardado
  * @throws {Error} Si ocurre un error al guardar el proyecto
  */
-export async function saveProject(projectData) {
-  const projectsCollection = collection(db, "projects");
+export async function createProject(projectData) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuario no autenticado");
+
+  const projectsCollection = collection(db, `users/${user.uid}/projects`);
   const docRef = await addDoc(projectsCollection, projectData);
   return { id: docRef.id, ...projectData };
 }
@@ -110,28 +108,22 @@ export async function saveProject(projectData) {
  * @param {Project} projectData
  */
 export async function updateProject(projectData) {
-  const projectDoc = doc(db, "projects", projectData.id);
+  const projectDoc = doc(db, `users/${auth.currentUser.uid}/projects`, projectData.id);
   await updateDoc(projectDoc, projectData);
 }
 
 /**
- * Obtener todas las tareas de un proyecto
+ * Obtener tareas de un proyecto
  * @param {string} projectId
  * @returns {Promise<TaskDto[]>} Lista de tareas del proyecto
  */
 export async function getTasks(projectId) {
-  const tasksCollection = collection(db, `projects/${projectId}/tasks`);
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuario no autenticado");
+
+  const tasksCollection = collection(db, `users/${user.uid}/projects/${projectId}/tasks`);
   const snapshot = await getDocs(tasksCollection);
-  return snapshot.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      title: data.title || "",
-      dueDate: data.dueDate || "",
-      status: data.status || "",
-      priority: data.priority || "",
-    };
-  });
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
 /**
@@ -141,7 +133,10 @@ export async function getTasks(projectId) {
  * @returns {Promise<Task|null>} Tarea encontrada o null si no existe
  */
 export async function getTask(projectId, taskId) {
-  const taskDoc = doc(db, `projects/${projectId}/tasks`, taskId);
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuario no autenticado");
+
+  const taskDoc = doc(db, `users/${user.uid}/projects/${projectId}/tasks`, taskId);
   const snapshot = await getDoc(taskDoc);
   return snapshot.exists()
     ? {
@@ -166,13 +161,17 @@ export async function getTask(projectId, taskId) {
 }
 
 /**
- * Agregar una nueva tarea
+ * Crear una nueva tarea
  * @param {string} projectId
  * @param {Omit<Task, "id">} taskData
- * @returns
+ * @returns {Promise<Task>} Tarea guardada
+ * @throws {Error} Si ocurre un error al guardar la tarea
  */
-export async function addTask(projectId, taskData) {
-  const tasksCollection = collection(db, `projects/${projectId}/tasks`);
+export async function createTask(projectId, taskData) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuario no autenticado");
+
+  const tasksCollection = collection(db, `users/${user.uid}/projects/${projectId}/tasks`);
   const docRef = await addDoc(tasksCollection, taskData);
   return { id: docRef.id, ...taskData };
 }
@@ -183,7 +182,10 @@ export async function addTask(projectId, taskData) {
  * @param {Task} taskData
  */
 export async function updateTask(projectId, taskData) {
-  const taskDoc = doc(db, `projects/${projectId}/tasks`, taskData.id);
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuario no autenticado");
+
+  const taskDoc = doc(db, `users/${user.uid}/projects/${projectId}/tasks`, taskData.id);
   await updateDoc(taskDoc, taskData);
 }
 
@@ -193,6 +195,9 @@ export async function updateTask(projectId, taskData) {
  * @param {string} taskId
  */
 export async function deleteTask(projectId, taskId) {
-  const taskDoc = doc(db, `projects/${projectId}/tasks`, taskId);
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuario no autenticado");
+
+  const taskDoc = doc(db, `users/${user.uid}/projects/${projectId}/tasks`, taskId);
   await deleteDoc(taskDoc);
 }

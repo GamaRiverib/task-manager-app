@@ -1,6 +1,6 @@
 // @ts-check
 
-import { saveProject } from "../firestore-service.js";
+import { createProject } from "../firestore-service.js";
 import { renderProjects } from "./projects-list.js";
 
 /**
@@ -47,7 +47,7 @@ export function renderAddProjectForm(projects) {
       return;
     }
 
-    const project = await saveProject({
+    const project = await createProject({
       name,
       description,
       categories: [],

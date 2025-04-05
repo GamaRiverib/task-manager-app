@@ -1,6 +1,6 @@
 // @ts-check
 
-import { addTask, TaskPriority, TaskStatus } from "../firestore-service.js";
+import { createTask, TaskPriority, TaskStatus } from "../firestore-service.js";
 import { renderProjectDetails } from "./project-details.js";
 
 /**
@@ -96,7 +96,7 @@ export function renderAddTaskForm(projects, project, tasks) {
       return;
     }
 
-    const task = await addTask(project.id, {
+    const task = await createTask(project.id, {
       title,
       description,
       assignee,

@@ -9,7 +9,6 @@ import { renderAddProjectForm } from "./add-project-form.js";
  * @param {import("../firestore-service.js").Project[]} projects - Lista de proyectos a renderizar
  */
 export function renderProjects(projects) {
-  console.log({projects});
   updateURL({ page: null, projectId: null });
 
   const container = document.createElement("div");
