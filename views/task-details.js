@@ -503,8 +503,7 @@ export async function renderTaskDetails(projects, project, tasks, taskId) {
     try {
       // Actualizar los atributos de la tarea con los valores del formulario
       updateTaskFromForm(task, generalSection, trackingSection);
-
-      console.log(task); // Verificar los cambios en la consola
+      
       await updateTask(project.id, task); // Guardar los cambios en Firestore
       const index = tasks.findIndex((t) => t.id === task.id);
       if (index !== -1) {
