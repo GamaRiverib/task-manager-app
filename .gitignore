@@ -4,3 +4,4 @@ public/
 firebase-config.js
 *.log
 *.env
+.firebaserc
